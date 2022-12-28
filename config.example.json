@@ -1,0 +1,10 @@
+{
+    "OWNERS": ["153102177429094400"],
+    "ADMIN_COMMAND_ROLE_NAMES": ["Moderator", "Admin"],
+
+    "Settings": {
+        "LISTEN_PORT": 42043,
+		"LOG_CHANNEL": "dev_status_monitoring_test",
+		"VERBOSE": true
+    }
+}

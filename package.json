@@ -1,0 +1,18 @@
+{
+  "name": "sotbot",
+  "version": "2.0.0",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/requiem-community/sot-bot-rewrite.git"
+  },
+  "dependencies": {
+    "discord.js": "^14.7.1",
+    "dotenv": "^16.0.3",
+    "moment": "^2.29.4",
+    "shelljs": "^0.8.5"
+  },
+  "devDependencies": {
+    "eslint": "^8.29.0"
+  }
+}
