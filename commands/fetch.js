@@ -27,9 +27,9 @@ module.exports = {
 
 	permission(interaction, client) {
 		const isOwner = client.config.OWNERS.includes(interaction.user.id);
-		const isAdmin = interaction.member.roles.cache.some(role => client.config.ADMIN_COMMAND_ROLE_NAMES.includes(role.name));
+		const isManager = interaction.member.roles.cache.some(role => client.config.MANAGER_ROLE_NAMES.includes(role.name));
 
-		return isOwner || isAdmin;
+		return isOwner || isManager;
 	},
 
 	async execute(interaction, client) {
