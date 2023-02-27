@@ -133,10 +133,6 @@ async function createServerCategory(interaction, server_number) {
 		reason: `Creating alliance server (${interaction.member.displayName} - ${interaction.member.id})`,
 		permissionOverwrites: [
 			{
-				id: interaction.guild.roles.cache.find(role => role.name == 'Sea of Thieves').id,
-				allow: ['ViewChannel'],
-			},
-			{
 				id: interaction.guild.roles.cache.find(role => role.name == 'SoT Officer').id,
 				allow: ['ViewChannel', 'ManageMessages'],
 			},
@@ -146,7 +142,8 @@ async function createServerCategory(interaction, server_number) {
 			},
 			{
 				id: interaction.guild.id,
-				deny: ['ViewChannel', 'Connect', 'UseEmbeddedActivities'],
+				allow: ['ViewChannel'],
+				deny: ['Connect', 'UseEmbeddedActivities'],
 			},
 		],
 	});
@@ -249,11 +246,8 @@ async function lockServer(interaction) {
 	await interaction.editReply('Un-set channel limits...');
 	await Promise.all(channels.map(channel => channel.setUserLimit(0, `Locking alliance server (${interaction.member.displayName} - ${interaction.member.id})`)));
 
-	await interaction.editReply('Get role...');
-	const sota_role = interaction.guild.roles.cache.find(role => role.name == 'Sea of Thieves');
-
 	await interaction.editReply('Change permissions...');
-	await Promise.all(channels.map(channel => channel.permissionOverwrites.delete(sota_role, `Locking alliance server (${interaction.member.displayName} - ${interaction.member.id})`)));
+	await Promise.all(channels.map(channel => channel.permissionOverwrites.edit(interaction.guild.id, { ViewChannel: false, Connect: false }, { reason: `Locking alliance server (${interaction.member.displayName} - ${interaction.member.id})` })));
 
 	await interaction.editReply(`Locked server \`${number}\``);
 }
@@ -266,9 +260,13 @@ async function unlockServer(interaction) {
 	if (!unlock_category) return interaction.editReply(`Server \`${number}\` does not exist!`);
 
 	await interaction.editReply('Get channels...');
-	const channels = await getActiveShipChannels(unlock_category);
+	let channels = await getActiveShipChannels(unlock_category);
 
-	if (channels.size == 0) return await interaction.editReply(`Server \`${number}\` does not have any active ships!`);
+	if (channels.size == 0) {
+		await interaction.guild.channels.fetch();
+		channels = await getActiveShipChannels(unlock_category);
+		if (channels.size == 0) return await interaction.editReply(`Server \`${number}\` does not have any active ships!`);
+	}
 
 	const ship_capacities = {
 		'S': 2,
@@ -279,11 +277,8 @@ async function unlockServer(interaction) {
 	await interaction.editReply('Set channel limits...');
 	await Promise.all(channels.map(channel => channel.setUserLimit(ship_capacities[channel.name.match(/-(\w{1,3})]/i)[1].replace('C', '')], `Unlocking alliance server (${interaction.member.displayName} - ${interaction.member.id})`)));
 
-	await interaction.editReply('Get role...');
-	const sota_role = interaction.guild.roles.cache.find(role => role.name == 'Sea of Thieves');
-
 	await interaction.editReply('Change permissions...');
-	await Promise.all(channels.map(channel => channel.permissionOverwrites.create(sota_role, { ViewChannel: true, Connect: true }, `Unlocking alliance server (${interaction.member.displayName} - ${interaction.member.id})`)));
+	await Promise.all(channels.map(channel => channel.permissionOverwrites.edit(interaction.guild.id, { ViewChannel: true, Connect: true }, { reason: `Locking alliance server (${interaction.member.displayName} - ${interaction.member.id})` })));
 
 	await interaction.editReply(`Unlocked server \`${number}\``);
 }
