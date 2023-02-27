@@ -1,10 +1,163 @@
 {
-    "OWNERS": ["153102177429094400"],
-    "ADMIN_COMMAND_ROLE_NAMES": ["Moderator", "Admin"],
+	"OWNERS": [
+		"153102177429094400"
+	],
 
-    "Settings": {
-        "LISTEN_PORT": 42043,
+	"MANAGER_ROLE_NAMES": [
+		"Moderator",
+		"Admin"
+	],
+
+	"STAFF_ROLE_NAMES": [
+		"SoT Senior Officer"
+	],
+
+	"Settings": {
+		"RECONNECT_MS": 5000,
+        "HEARTBEAT_URL": "http://uptimerobot.com/someheartbeat",
 		"LOG_CHANNEL": "dev_status_monitoring_test",
 		"VERBOSE": true
-    }
+	},
+
+	"PERMISSION_GROUPS": {
+		"default": [
+			{
+				"id": "@everyone",
+				"deny": ["ViewChannel", "Connect", "UseEmbeddedActivities", "SendMessages"],
+				"allow": []
+			},
+			{
+				"id": "@alliance",
+				"deny": [],
+				"allow": ["ViewChannel"]
+			},
+			{
+				"id": "SoT Officer",
+				"deny": ["SendMessages"],
+				"allow": ["ViewChannel", "ManageChannels", "Connect", "MoveMembers"]
+			},
+			{
+				"id": "Moderator",
+				"deny": ["SendMessages"],
+				"allow": ["ViewChannel", "ManageChannels", "Connect", "MoveMembers"]
+			}
+		],
+
+		"default_text": [
+			{
+				"id": "@everyone",
+				"deny": ["ViewChannel"],
+				"allow": []
+			},
+			{
+				"id": "@alliance",
+				"deny": [],
+				"allow": ["ViewChannel"]
+			},
+			{
+				"id": "SoT Officer",
+				"deny": [],
+				"allow": ["ViewChannel", "ManageMessages"]
+			},
+			{
+				"id": "Moderator",
+				"deny": [],
+				"allow": ["ViewChannel", "ManageChannels", "ManageMessages"]
+			}
+		],
+
+		"situation_room": [
+			{
+				"id": "@everyone",
+				"deny": ["ViewChannel", "SendMessages", "UseEmbeddedActivities"],
+				"allow": []
+			},
+			{
+				"id": "SoT Officer",
+				"deny": ["SendMessages"],
+				"allow": ["ViewChannel", "Connect", "MoveMembers"]
+			},
+			{
+				"id": "Moderator",
+				"deny": ["SendMessages"],
+				"allow": ["ViewChannel", "ManageChannels", "Connect", "MoveMembers"]
+			}
+		],
+
+		"status_indicator": [
+			{
+				"id": "@everyone",
+				"deny": ["ViewChannel", "Connect", "SendMessages"],
+				"allow": []
+			},
+			{
+				"id": "Sea of Thieves",
+				"deny": [],
+				"allow": ["ViewChannel"]
+			},
+			{
+				"id": "SoT Officer",
+				"deny": ["SendMessages"],
+				"allow": ["ManageChannels"]
+			},
+			{
+				"id": "Moderator",
+				"deny": ["SendMessages"],
+				"allow": ["ManageChannels"]
+			}
+		]
+	},
+
+	"SOTA_TEMPLATE": [
+		{
+			"type": "text",
+			"name": "server${N}_chat",
+			"permission_group": "default_text"
+		},
+		{
+			"type": "text",
+			"name": "server${N}_emissary",
+			"permission_group": "default_text"
+		},
+		{
+			"type": "text",
+			"name": "server${N}_leaving",
+			"permission_group": "default_text"
+		},
+		{
+			"type": "voice",
+			"name": "${N}- [] 🟣 Extra Channel",
+			"permission_group": "default"
+		},
+		{
+			"type": "voice",
+			"name": "${N}- [] ⚫ Extra Channel",
+			"permission_group": "default"
+		},
+		{
+			"type": "voice",
+			"name": "${N}- [] 🔴 Extra Channel",
+			"permission_group": "default"
+		},
+		{
+			"type": "voice",
+			"name": "${N}- [] 🔵 Extra Channel",
+			"permission_group": "default"
+		},
+		{
+			"type": "voice",
+			"name": "${N}- [] 🟢 Extra Channel",
+			"permission_group": "default"
+		},
+		{
+			"type": "voice",
+			"name": "${N}- Situation Room",
+			"permission_group": "situation_room"
+		},
+		{
+			"type": "voice",
+			"name": "🔴 SERVER ${N}",
+			"permission_group": "status_indicator"
+		}
+	]
 }
