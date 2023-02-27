@@ -13,6 +13,6 @@ module.exports = (({ client, fs }) => {
 			console.warn(`[COMMANDS] The command at ${commandDir}/${file} is missing a required "data" or "execute" property.`);
 		}
 
-		client.commands.set(command.data.name, { data: command.data, execute: command.execute, permission: command.permission });
+		client.commands.set(command.data.name, { data: command.data, execute: command.execute, permission: command.permission, cooldown: command.cooldown });
 	});
 });

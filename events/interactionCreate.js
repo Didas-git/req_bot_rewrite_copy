@@ -1,9 +1,11 @@
 const { Events } = require('discord.js');
 
+const cooldowns = new Map();
+
 const executeCommand = async (client, interaction) => {
 	const command = client.commands.find(cmd => cmd.data.name == interaction.commandName);
 
-	if (client.state < 3) { return await interaction.reply('Client is still starting'); }
+	// if (client.state < 3) { return await interaction.reply('Client is still starting'); }
 	if (!command) { return client.error('COMMANDS', `Command '${interaction.commandName}' not found!`); }
 
 	try {
@@ -17,11 +19,15 @@ const executeCommand = async (client, interaction) => {
 			return interaction.reply('No Permission!');
 		}
 
+		if (cooldowns.has(command.data.name)) return interaction.reply('Woah, slow down there, you\'re going too fast!');
+
 		if (client.config.Settings.VERBOSE) {
 			await client.log('COMMANDS', `${interaction.user} ran the command \`/${interaction.commandName}\`${args}${sub_args}`);
 		}
 
+		if (command.cooldown) cooldowns.set(command.data.name, true);
 		await command.execute(interaction, client);
+		setTimeout(() => cooldowns.delete(command.data.name), command.cooldown);
 	}
 
 	catch (error) {

@@ -1,10 +1,22 @@
-const { Client, GatewayIntentBits } = require('discord.js');
+const { Client, GatewayIntentBits, Partials } = require('discord.js');
 const { build, env } = require('./modules/config.js');
 const fs = require('node:fs');
 
 
 const client = new Client({
-	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildPresences],
+	intents: [
+		GatewayIntentBits.Guilds,
+		GatewayIntentBits.GuildMessages,
+		GatewayIntentBits.GuildPresences,
+		GatewayIntentBits.MessageContent,
+		GatewayIntentBits.GuildMembers,
+		GatewayIntentBits.GuildVoiceStates,
+	],
+	partials: [
+		Partials.Channel,
+		Partials.GuildMember,
+		Partials.Message,
+	],
 });
 
 client.root = __dirname;

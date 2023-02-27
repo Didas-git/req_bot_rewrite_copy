@@ -48,8 +48,11 @@ module.exports = {
 			client.error = console.error;
 		}
 
+		// Start updating alliance status indicators
+		require(client.root + '/modules/alliance_indicators.js')(client);
+
 		// Create HTTP server for uptime tracking
-		require(client.root + '/modules/http_service.js')(client);
+		require(client.root + '/modules/uptime_heartbeat.js')(client);
 
 		// Generate JSON and push commands to Discord
 		register_commands(client);
