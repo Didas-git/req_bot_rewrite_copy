@@ -39,8 +39,8 @@ function joinedShip(state) {
 
 	state.member.roles.add(sota_role, 'Joined a ship');
 	state.channel.permissionOverwrites.create(state.member, { ViewChannel: true, Connect: true }, 'Joined a ship');
-	clearTimeout(accessTimers.get(state.member.id));
-	accessTimers.delete(state.member.id);
+	clearTimeout(accessTimers.get(`${state.channelId}:${state.member.id}`));
+	accessTimers.delete(`${state.channelId}:${state.member.id}`);
 }
 
 function leftShip(state, options) {
@@ -49,7 +49,7 @@ function leftShip(state, options) {
 
 	if (!options?.skipRemoveSotaRole) state.member.roles.remove(sota_role, 'Left a ship');
 	if (!options?.RECONNECT_MS) return state.channel.permissionOverwrites.delete(state.member, 'Left a ship');
-	accessTimers.set(state.member.id, setTimeout(() => state.channel.permissionOverwrites.delete(state.member, 'Left a ship'), options.RECONNECT_MS));
+	accessTimers.set(`${state.channelId}:${state.member.id}`, setTimeout(() => state.channel.permissionOverwrites.delete(state.member, 'Left a ship'), options.RECONNECT_MS));
 }
 
 function movedShip(oldState, newState) {
