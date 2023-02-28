@@ -1,7 +1,8 @@
 const { ChannelType } = require('discord.js');
 
 module.exports = (client) => {
-	client.guilds.cache.forEach(guild => new StatusUpdater(client, guild));
+	client.status_updaters = new Map();
+	client.guilds.cache.forEach(guild => client.status_updaters.set(guild.id, new StatusUpdater(client, guild)));
 };
 
 class StatusUpdater {
@@ -12,8 +13,15 @@ class StatusUpdater {
 		const categories = this.getCategories(guild);
 		this.intervals = new Map();
 
+		this.update = (async () => {
+			categories.forEach(category => this.updateStatus(category));
+		})();
+
 		categories.forEach(category => this.intervals.set(category.server_number, setInterval(() => this.updateStatus(category), 600000)));
-		categories.forEach(category => this.updateStatus(category));
+	}
+
+	add(category) {
+		this.intervals.set(category.server_number, setInterval(() => this.updateStatus(category), 600000));
 	}
 
 	getCategories(guild) {
