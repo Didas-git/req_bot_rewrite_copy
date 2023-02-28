@@ -52,7 +52,7 @@ module.exports = {
 		switch (interaction.options.getSubcommand()) {
 
 		case 'create': {
-			createServer(interaction);
+			createServer(interaction, client);
 			break;
 		}
 
@@ -165,7 +165,7 @@ async function createChannels(interaction, server_number, category, permissions)
 	}));
 }
 
-async function createServer(interaction) {
+async function createServer(interaction, client) {
 	await interaction.editReply('Determine server number...');
 	const number = getNextServer(interaction);
 
@@ -179,13 +179,16 @@ async function createServer(interaction) {
 	await interaction.editReply('Create category...');
 	const category = await createServerCategory(interaction, number.toString());
 
+	await interaction.editReply('Attach status refresher...');
+	client.status_updaters.get(interaction.guild.id).add(category);
+
 	await interaction.editReply('Create channels...');
 	await createChannels(interaction, number, category, permissions);
 
 	await interaction.editReply('Finished creating server!');
 }
 
-async function removeServer(interaction, client) {
+async function removeServer(interaction) {
 	await interaction.editReply('Find server...');
 	const number = interaction.options.getNumber('number');
 	const delete_category = await getServer(interaction, number);
@@ -202,7 +205,6 @@ async function removeServer(interaction, client) {
 
 	await interaction.editReply('Rename other servers...');
 	const rename_category = getCategories(interaction).first();
-	client.status_updaters.get(interaction.guild.id);
 
 	if (rename_category?.server_number > number) {
 		await rename_category.setName(`━━━[ SoT Alliance ${number} ]━━━`);
