@@ -46,7 +46,7 @@ module.exports = {
 		return isOwner || isManager || isStaff;
 	},
 
-	async execute(interaction) {
+	async execute(interaction, client) {
 		await interaction.deferReply();
 
 		switch (interaction.options.getSubcommand()) {
@@ -57,7 +57,7 @@ module.exports = {
 		}
 
 		case 'remove': {
-			removeServer(interaction);
+			removeServer(interaction, client);
 			break;
 		}
 
@@ -185,7 +185,7 @@ async function createServer(interaction) {
 	await interaction.editReply('Finished creating server!');
 }
 
-async function removeServer(interaction) {
+async function removeServer(interaction, client) {
 	await interaction.editReply('Find server...');
 	const number = interaction.options.getNumber('number');
 	const delete_category = await getServer(interaction, number);
@@ -202,6 +202,7 @@ async function removeServer(interaction) {
 
 	await interaction.editReply('Rename other servers...');
 	const rename_category = getCategories(interaction).first();
+	client.status_updaters.get(interaction.guild.id);
 
 	if (rename_category?.server_number > number) {
 		await rename_category.setName(`━━━[ SoT Alliance ${number} ]━━━`);
@@ -265,7 +266,7 @@ async function unlockServer(interaction) {
 	let channels = await getActiveShipChannels(unlock_category);
 
 	if (channels.size == 0) {
-		await interaction.guild.channels.fetch();
+		await interaction.guild.channels.fetch(true);
 		channels = await getActiveShipChannels(unlock_category);
 		if (channels.size == 0) return await interaction.editReply(`Server \`${number}\` does not have any active ships!`);
 	}
