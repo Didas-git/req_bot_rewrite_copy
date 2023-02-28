@@ -15,8 +15,8 @@ module.exports = {
 		const left_a_ship = channel_ids.includes(oldState.channelId);
 
 		if (joined_a_ship && !left_a_ship) joinedShip(newState);
-		if (!joined_a_ship && left_a_ship) leftShip(oldState, { RECONNECT_MS: client.config.Settings.RECONNECT_MS });
-		if (joined_a_ship && left_a_ship) movedShip(oldState, newState);
+		if (!joined_a_ship && left_a_ship) await leftShip(oldState, { RECONNECT_MS: client.config.Settings.RECONNECT_MS });
+		if (joined_a_ship && left_a_ship) await movedShip(oldState, newState);
 	},
 };
 
@@ -43,7 +43,12 @@ function joinedShip(state) {
 	accessTimers.delete(`${state.channelId}:${state.member.id}`);
 }
 
-function leftShip(state, options) {
+async function leftShip(state, options) {
+	if (!state.channel) {
+		state.channel = await state.guild.channels.fetch(state.channel);
+		if (!state.channel) return;
+	}
+
 	const server_number = state.channel.name.match(/\d+/)[0];
 	const sota_role = state.guild.roles.cache.find(role => role.name == `SOTA-${server_number}`);
 
@@ -52,10 +57,10 @@ function leftShip(state, options) {
 	accessTimers.set(`${state.channelId}:${state.member.id}`, setTimeout(() => state.channel.permissionOverwrites.delete(state.member, 'Left a ship'), options.RECONNECT_MS));
 }
 
-function movedShip(oldState, newState) {
+async function movedShip(oldState, newState) {
 	const [old_server_number, new_server_number] = [oldState, newState].map(state => state.channel.name.match(/\d+/)[0]);
 
 	joinedShip(newState);
 	if (old_server_number == new_server_number) return leftShip(oldState, { skipRemoveSotaRole: true });
-	leftShip(oldState);
+	await leftShip(oldState);
 }
