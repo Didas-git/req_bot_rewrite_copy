@@ -111,10 +111,11 @@ function parsePermissions(interaction, sota_role) {
 		return {
 			[key]: (() => {
 				return interaction.client.config.PERMISSION_GROUPS[key].map(groupItem => {
-					if (groupItem.id == '@everyone') groupItem.id = interaction.guild.id;
-					if (groupItem.id == '@alliance') groupItem.id = sota_role.id;
-					if (isNaN(groupItem.id)) groupItem.id = interaction.guild.roles.cache.find(role => role.name == groupItem.id).id;
-					return groupItem;
+					const localGroupItem = { ...groupItem };
+					if (localGroupItem.id == '@everyone') localGroupItem.id = interaction.guild.id;
+					if (localGroupItem.id == '@alliance') localGroupItem.id = sota_role.id;
+					if (isNaN(localGroupItem.id)) localGroupItem.id = interaction.guild.roles.cache.find(role => role.name == localGroupItem.id).id;
+					return localGroupItem;
 				});
 			})(),
 		};
@@ -173,6 +174,7 @@ async function createServer(interaction) {
 
 	await interaction.editReply('Parse permissions...');
 	const permissions = parsePermissions(interaction, role);
+	console.log(permissions);
 
 	await interaction.editReply('Create category...');
 	const category = await createServerCategory(interaction, number.toString());
