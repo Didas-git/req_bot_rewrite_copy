@@ -10,9 +10,9 @@ class StatusUpdater {
 		this.guild = guild;
 
 		const categories = this.getCategories(guild);
-		const intervals = new Map();
+		this.intervals = new Map();
 
-		categories.forEach(category => intervals.set(category.server_number, setInterval(() => this.updateStatus(category), 600000)));
+		categories.forEach(category => this.intervals.set(category.server_number, setInterval(() => this.updateStatus(category), 600000)));
 		categories.forEach(category => this.updateStatus(category));
 	}
 
@@ -37,15 +37,7 @@ class StatusUpdater {
 	}
 
 	async updateStatus(category) {
-		if (!category.guild.channels.cache.has(category.id)) {
-			try {
-				return clearInterval(this.intervals.get(category.server_number));
-			}
-
-			catch (e) {
-				return;
-			}
-		}
+		if (!category.guild.channels.cache.has(category.id)) return clearInterval(this.intervals.get(category.server_number));
 
 		const active_ships = await this.getActiveShipChannels(category);
 		const status_indicator = await this.getStatusIndicator(category);
