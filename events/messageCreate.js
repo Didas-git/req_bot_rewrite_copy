@@ -160,6 +160,8 @@ async function handleRequest(approved, interaction, sot_logs, help_desk) {
 
 async function editLogMessage(messageId, message, log_channel) {
 	const request = await getLeavingEntryByMessageID(messageId);
+	if (!request) return;
+
 	const log_message = await log_channel.messages.fetch(request.logs_message);
 	const log_embed = log_message.embeds[0];
 
