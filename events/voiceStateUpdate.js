@@ -117,8 +117,6 @@ async function approved_to_leave(voiceState, sot_logs) {
 	const { approved_by: approved_by_id, approved_at: approved_at_iso } = await redis.hGetAll(`approval:${member.id}`);
 	const [approved_by, approved_at] = [guild.members.fetch(approved_by_id), new Date(approved_at_iso)];
 
-	console.log(approved_at);
-
 	const log_embed = new EmbedBuilder()
 		.setDescription(`**${member} left ${voiceState.channel}\nApproved by ${await approved_by} at <t:${Math.floor(approved_at / 1000)}:f>**`)
 		.setColor('00e631');
@@ -171,5 +169,5 @@ async function left_without_approval(voiceState, sot_logs) {
 
 async function ping_officer(channel) {
 	const ping_role = channel.guild.roles.cache.find(role => role.name == channel.client.config.STAFF_PING_ROLE);
-	channel.send(ping_role.toString()).then(ping => ping.delete());
+	channel.send(`${ping_role}`).then(ping => ping.delete());
 }
