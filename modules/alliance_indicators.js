@@ -47,7 +47,7 @@ class StatusUpdater {
 	async updateStatus(category) {
 		if (!category.guild.channels.cache.has(category.id)) return clearInterval(this.intervals.get(category.server_number));
 
-		const active_ships = await this.getActiveShipChannels(category);
+		const active_ships = await this.getActiveShipChannels(category).filter(channel => !channel.name.match(/\Whid(e|den)\W/i));
 		const status_indicator = await this.getStatusIndicator(category);
 		const new_name = (active_ships.size > 0) ? `🟢 SERVER ${category.server_number} [${active_ships.size} SHIPS]` : `🔴 SERVER ${category.server_number}`;
 		if (status_indicator.name == new_name) return;
