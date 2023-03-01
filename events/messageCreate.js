@@ -120,7 +120,7 @@ async function leavingRequest(args, requester, leaving_channel, message, config)
 
 	await redis.hSet(`leaving_req:${playerLeaving.id}`, redis_hash);
 
-	message.delete();
+	message.delete().catch(e => e);
 
 	redis.expire(`leaving_req:${playerLeaving.id}`, 60 * 30);
 	redis.set(`warn_window:${playerLeaving.id}`, `${Date.now() + (1000 * 60 * 10)}`, { EX: 60 * 10 });
@@ -134,11 +134,11 @@ async function handleInteraction(interaction) {
 
 	if (interaction.customId == 'leaving_approve') handleRequest(true, interaction, sot_logs);
 	if (interaction.customId == 'leaving_cancel') handleRequest(false, interaction, sot_logs, help_desk);
-	if (interaction.customId == 'leaving_clear') interaction.message.delete();
+	if (interaction.customId == 'leaving_clear') interaction.message.delete().catch(e => e);
 }
 
 async function handleRequest(approved, interaction, sot_logs, help_desk) {
-	interaction.message.delete();
+	interaction.message.delete().catch(e => e);
 	timeouts.get(interaction.user.id)?.forEach(timeout => clearTimeout(timeout));
 
 	await editLogMessage(interaction.message.id, (approved) ? `Approved by ${interaction.user.username}#${interaction.user.discriminator}` : `Cancelled by ${interaction.user.username}#${interaction.user.discriminator}`, sot_logs);
