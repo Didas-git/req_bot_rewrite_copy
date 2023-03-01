@@ -41,6 +41,7 @@ module.exports = {
 async function leavingRequest(args, requester, leaving_channel, message, config) {
 	const { guild } = leaving_channel;
 	const officer_role = guild.roles.cache.find(role => role.name == config.Mentions.roles.officer);
+	const ping_role = guild.roles.cache.find(role => role.name == config.STAFF_PING_ROLE);
 	const help_desk = guild.channels.cache.find(channel => channel.name.endsWith(config.Mentions.channels.help_desk));
 
 	const playerLeaving = (args.length > 0) ? await guild.members.fetch(args[0].match(/\d+/)[0]) : await guild.members.fetch(requester);
@@ -98,7 +99,7 @@ async function leavingRequest(args, requester, leaving_channel, message, config)
 	const logs_message = await sot_logs.send({ embeds: [log_embed] });
 	const user_message = await leaving_channel.send({ embeds: [user_embed] });
 
-	sot_leaving.send(`${config.STAFF_PING_ROLE}`).then(ping => ping.delete());
+	sot_leaving.send(`${ping_role}`).then(ping => ping.delete());
 
 	timeouts.set(playerLeaving.id, [
 		setTimeout(() => officer_prompt.delete(), 1000 * 60 * 30),
@@ -137,7 +138,7 @@ async function handleInteraction(interaction) {
 }
 
 async function handleRequest(approved, interaction, sot_logs, help_desk) {
-	await interaction.reply({ content: '\u200B', fetchReply: true }).catch(e => console.error(e)).then(response => response.delete());
+	interaction.message.delete();
 	timeouts.get(interaction.user.id)?.forEach(timeout => clearTimeout(timeout));
 
 	await editLogMessage(interaction.message.id, (approved) ? `Approved by ${interaction.user.username}#${interaction.user.discriminator}` : `Cancelled by ${interaction.user.username}#${interaction.user.discriminator}`, sot_logs);
@@ -207,5 +208,5 @@ async function notifyUser(interaction, approved, messageContent) {
 		.setColor('e62600');
 
 	user_message.reply({ embeds: [(approved) ? approval_embed : cancel_embed] });
-	request_channel.send({ content: member.toString() }).then(ping => ping.delete());
+	request_channel.send(`${member}`).then(ping => ping.delete());
 }
