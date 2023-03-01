@@ -1,6 +1,6 @@
 {
   "name": "sotbot",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "main": "index.js",
   "repository": {
     "type": "git",
@@ -10,6 +10,7 @@
     "discord.js": "^14.7.1",
     "dotenv": "^16.0.3",
     "moment": "^2.29.4",
+    "redis": "^4.6.5",
     "shelljs": "^0.8.5"
   },
   "devDependencies": {
