@@ -118,7 +118,7 @@ async function approved_to_leave(voiceState, sot_logs) {
 	const [approved_by, approved_at] = [guild.members.fetch(approved_by_id), new Date(approved_at_iso)];
 
 	const log_embed = new EmbedBuilder()
-		.setDescription(`**${member} left ${voiceState.channel}\nApproved by ${await approved_by} at <t:${Math.floor(approved_at / 1000)}:f>**`)
+		.setDescription(`**${member} left ${voiceState.channel}**\nApproved by ${await approved_by} at <t:${Math.floor(approved_at / 1000)}:f>`)
 		.setColor('00e631');
 
 	sot_logs.send({ embeds: [log_embed] });
@@ -136,7 +136,7 @@ async function left_to_soon(voiceState, sot_logs) {
 	const mm = Math.floor(seconds_since_request / 60) % 60;
 
 	const log_embed = new EmbedBuilder()
-		.setDescription(`**${member} left ${voiceState.channel} ${mm.toString().padStart(2, '0')}m ${ss.toString().padStart(2, '0')}s after requesting.**`)
+		.setDescription(`**${member} left ${voiceState.channel} after ${mm.toString().padStart(2, '0')}m ${ss.toString().padStart(2, '0')}s**`)
 		.setFooter({ text: 'The user left the ship too soon, they should stay for 10 mins unless approved.' })
 		.setColor('e66700');
 
