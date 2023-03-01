@@ -94,7 +94,6 @@ async function checkLeavingRequest(voiceState, client) {
 
 	if (prompt_message) prompt_message.edit({ components: [officer_ack_button] });
 
-	client.timeouts.get(member.id)?.forEach(timeout => clearTimeout(timeout));
 	if (approval) return approved_to_leave(voiceState, sot_logs);
 	if (!leaving_req) return no_leaving_request(voiceState, sot_logs);
 	if (warn_window) return left_to_soon(voiceState, sot_logs);
