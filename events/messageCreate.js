@@ -1,7 +1,6 @@
 const { Events, ChannelType, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Collection } = require('discord.js');
 const redis = require('../modules/redis');
 
-const timeouts = new Map();
 let listener_attached;
 
 module.exports = {
@@ -13,6 +12,7 @@ module.exports = {
 
 		if (!listener_attached) {
 			client.on('interactionCreate', handleInteraction);
+			client.timeouts = new Map();
 			listener_attached = true;
 		}
 
@@ -101,8 +101,8 @@ async function leavingRequest(args, requester, leaving_channel, message, config)
 
 	sot_leaving.send(`${ping_role}`).then(ping => ping.delete());
 
-	timeouts.set(playerLeaving.id, [
-		setTimeout(() => officer_prompt.delete(), 1000 * 60 * 30),
+	guild.client.timeouts.set(playerLeaving.id, [
+		setTimeout(() => officer_prompt.delete().catch(e => e), 1000 * 60 * 30),
 		setTimeout(() => {
 			log_embed.setFooter({ text: 'Expired' });
 			logs_message.edit({ embeds: [{ ...log_embed }] });
@@ -139,7 +139,7 @@ async function handleInteraction(interaction) {
 
 async function handleRequest(approved, interaction, sot_logs, help_desk) {
 	interaction.message.delete().catch(e => e);
-	timeouts.get(interaction.user.id)?.forEach(timeout => clearTimeout(timeout));
+	interaction.client.timeouts.get(interaction.user.id)?.forEach(timeout => clearTimeout(timeout));
 
 	await editLogMessage(interaction.message.id, (approved) ? `Approved by ${interaction.user.username}#${interaction.user.discriminator}` : `Cancelled by ${interaction.user.username}#${interaction.user.discriminator}`, sot_logs);
 	await notifyUser(interaction, approved, (approved) ? `your leaving request has been approved by ${interaction.member}\nPlease ensure you invite your replacement before heading out.` : `your leaving request was cancelled by ${interaction.member}\nIf you believe this was in error, please visit the ${help_desk}`);
