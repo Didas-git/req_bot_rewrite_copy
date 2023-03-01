@@ -12,7 +12,6 @@ module.exports = {
 
 		if (!listener_attached) {
 			client.on('interactionCreate', handleInteraction);
-			client.timeouts = new Map();
 			listener_attached = true;
 		}
 

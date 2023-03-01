@@ -7,6 +7,7 @@ module.exports = {
 	once: true,
 	async execute(client) {
 		client.state = 2;
+		client.timeouts = new Map();
 
 		// Attach config to client.config
 		require(client.root + '/modules/config.js').attach(client);
