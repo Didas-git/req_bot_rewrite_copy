@@ -38,11 +38,29 @@ module.exports = {
 	},
 };
 
+async function dummyRequest(message, playerLeaving, leaving_channel, sot_leaving) {
+	const prompt_embed = new EmbedBuilder()
+		.setDescription(`**${playerLeaving} is leaving ${playerLeaving.voice.channel}**`)
+		.setColor('e7c200');
+
+	const officer_ack_button = new ActionRowBuilder()
+		.addComponents(
+			new ButtonBuilder()
+				.setCustomId('leaving_clear')
+				.setLabel('Clear')
+				.setStyle(ButtonStyle.Secondary),
+		);
+
+	await sot_leaving.send({ embeds: [prompt_embed], components: [officer_ack_button] });
+	return leaving_channel.send('Dummy leaving request created.').then(response => setTimeout(() => response.delete(), 5000)).then(() => message.delete());
+}
+
 async function leavingRequest(args, requester, leaving_channel, message, config) {
 	const { guild } = leaving_channel;
 	const officer_role = guild.roles.cache.find(role => role.name == config.Mentions.roles.officer);
 	const ping_role = guild.roles.cache.find(role => role.name == config.STAFF_PING_ROLE);
 	const help_desk = guild.channels.cache.find(channel => channel.name.endsWith(config.Mentions.channels.help_desk));
+	const sot_leaving = guild.channels.cache.find(channel => channel.name == config.Mentions.channels.sot_leaving);
 
 	let playerLeaving = await guild.members.fetch(requester);
 	const otherPlayer = args.length && args[0].match(/\d+/) && await guild.members.fetch(args[0].match(/\d+/));
@@ -50,14 +68,16 @@ async function leavingRequest(args, requester, leaving_channel, message, config)
 
 	const self_request = playerLeaving.id == requester.id || !playerLeaving;
 
+	const is_on_duty = playerLeaving.roles.cache.has(ping_role.id);
 	const is_on_ship = playerLeaving.voice && playerLeaving.voice.channel.name.match(/-(\w{1,3})]/i)?.length > 1;
-	if (!is_on_ship) return leaving_channel.send(`${requester}\n${(self_request) ? 'You are' : 'That player is'} not on a ship.`).then(response => setTimeout(() => response.delete(), 5000)).then(() => message.delete());
+	if (!is_on_ship) return leaving_channel.send(`${requester}\n${(self_request) ? 'You are' : 'That player is'} not on a ship.${(is_on_duty ? '\n*Don\'t forget to rename the channel!*' : '')}`).then(response => setTimeout(() => response.delete(), 5000)).then(() => message.delete());
+
+	if (is_on_duty) return dummyRequest(message, playerLeaving, leaving_channel, sot_leaving);
 
 	const already_leaving = await redis.exists(`leaving_req:${playerLeaving.id}`).catch(e => console.error(e));
 	if (already_leaving) return leaving_channel.send(`${requester}\n${(self_request) ? 'You' : 'That player'} already has an active leaving request.`).then(response => setTimeout(() => response.delete(), 5000)).then(() => message.delete());
 
 	const sot_logs = guild.channels.cache.find(channel => channel.name == config.Mentions.channels.sot_logs);
-	const sot_leaving = guild.channels.cache.find(channel => channel.name == config.Mentions.channels.sot_leaving);
 	const expiry = Math.floor(Date.now() / 1000) + (60 * 30);
 
 	const user_embed = new EmbedBuilder()
