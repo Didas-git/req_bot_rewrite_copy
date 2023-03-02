@@ -71,7 +71,7 @@ async function leavingRequest(args, requester, leaving_channel, message, config)
 		.setColor('e7c200');
 
 	const log_embed = new EmbedBuilder()
-		.setTitle(`${playerLeaving.displayName}#${playerLeaving.user.discriminator} is leaving ${playerLeaving.voice.channel}`)
+		.setTitle(`${playerLeaving.user.tag} is leaving ${playerLeaving.voice.channel}`)
 		.addFields(
 			[
 				{ name: 'Original Ship Name', value: playerLeaving.voice.channel.name, inline: true },
@@ -117,7 +117,7 @@ async function leavingRequest(args, requester, leaving_channel, message, config)
 		logs_message: logs_message.id,
 	};
 
-	console.log(`[${officer_prompt.id}] ${playerLeaving.tag} is leaving - requested by ${requester.tag}`);
+	console.log(`[${officer_prompt.id}] ${playerLeaving.user.tag} is leaving - requested by ${requester.tag}`);
 	localLogMessages.set(officer_prompt.id, logs_message.id);
 
 	await redis.hSet(`leaving_req:${playerLeaving.id}`, redis_hash);
