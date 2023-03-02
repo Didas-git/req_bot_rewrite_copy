@@ -45,12 +45,12 @@ async function leavingRequest(args, requester, leaving_channel, message, config)
 	const help_desk = guild.channels.cache.find(channel => channel.name.endsWith(config.Mentions.channels.help_desk));
 
 	let playerLeaving = await guild.members.fetch(requester);
-	const otherPlayer = await guild.members.fetch(args[0].match(/\d+/));
-	if (otherPlayer) playerLeaving = otherPlayer[0];
+	const otherPlayer = args.length && args[0].match(/\d+/) && await guild.members.fetch(args[0].match(/\d+/));
+	if (otherPlayer) playerLeaving = otherPlayer;
 
-	const self_request = playerLeaving.id == requester.id;
+	const self_request = playerLeaving.id == requester.id || !playerLeaving;
 
-	const is_on_ship = playerLeaving.voice.channelId && playerLeaving.voice.channel.name.match(/-(\w{1,3})]/i)?.length > 1;
+	const is_on_ship = playerLeaving.voice && playerLeaving.voice.channel.name.match(/-(\w{1,3})]/i)?.length > 1;
 	if (!is_on_ship) return leaving_channel.send(`${requester}\n${(self_request) ? 'You are' : 'That player is'} not on a ship.`).then(response => setTimeout(() => response.delete(), 5000)).then(() => message.delete());
 
 	const already_leaving = await redis.exists(`leaving_req:${playerLeaving.id}`).catch(e => console.error(e));
