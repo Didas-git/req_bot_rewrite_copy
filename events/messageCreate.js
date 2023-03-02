@@ -2,6 +2,7 @@ const { Events, ChannelType, EmbedBuilder, ActionRowBuilder, ButtonBuilder, Butt
 const redis = require('../modules/redis');
 
 let listener_attached;
+const localLogMessages = new Map();
 
 module.exports = {
 	name: Events.MessageCreate,
@@ -51,8 +52,8 @@ async function leavingRequest(args, requester, leaving_channel, message, config)
 	const is_on_ship = playerLeaving.voice.channelId && playerLeaving.voice.channel.name.match(/-(\w{1,3})]/i)?.length > 1;
 	if (!is_on_ship) return leaving_channel.send(`${requester}\n${(self_request) ? 'You are' : 'That player is'} not on a ship.`).then(response => setTimeout(() => response.delete(), 5000)).then(() => message.delete());
 
-	const already_leaving = await redis.hGetAll(`leaving_req:${playerLeaving.id}`).catch(e => console.error(e));
-	if (Object.keys(already_leaving).length) return leaving_channel.send(`${requester}\n${(self_request) ? 'You' : 'That player'} already has an active leaving request.`).then(response => setTimeout(() => response.delete(), 5000)).then(() => message.delete());
+	const already_leaving = await redis.exists(`leaving_req:${playerLeaving.id}`).catch(e => console.error(e));
+	if (already_leaving) return leaving_channel.send(`${requester}\n${(self_request) ? 'You' : 'That player'} already has an active leaving request.`).then(response => setTimeout(() => response.delete(), 5000)).then(() => message.delete());
 
 	const sot_logs = guild.channels.cache.find(channel => channel.name == config.Mentions.channels.sot_logs);
 	const sot_leaving = guild.channels.cache.find(channel => channel.name == config.Mentions.channels.sot_leaving);
@@ -117,6 +118,9 @@ async function leavingRequest(args, requester, leaving_channel, message, config)
 		logs_message: logs_message.id,
 	};
 
+	console.log(`[${officer_prompt.id}] ${playerLeaving} is leaving - requested by ${requester}`);
+	localLogMessages.set(officer_prompt.id, logs_message.id);
+
 	await redis.hSet(`leaving_req:${playerLeaving.id}`, redis_hash);
 
 	message.delete().catch(e => e);
@@ -133,14 +137,32 @@ async function handleInteraction(interaction) {
 
 	if (interaction.customId == 'leaving_approve') handleRequest(true, interaction, sot_logs);
 	if (interaction.customId == 'leaving_cancel') handleRequest(false, interaction, sot_logs, help_desk);
-	if (interaction.customId == 'leaving_clear') interaction.message.delete().catch(e => e);
+	if (interaction.customId == 'leaving_clear') clearRequest(interaction, sot_logs);
+}
+
+async function clearRequest(interaction, sot_logs) {
+	interaction.message.delete().catch(e => e);
+
+	const log_message_id = localLogMessages.get(interaction.message.id);
+	const log_message = await sot_logs.messages.fetch(log_message_id);
+
+	if (log_message) {
+		const log_embed = log_message.embeds[0];
+
+		log_embed.data.footer.text = `Cleared by ${interaction.user.tag}`;
+		log_embed.data.timestamp = new Date().toISOString();
+		log_message.edit({ embeds: [log_embed] });
+	}
+
+	localLogMessages.delete(interaction.message.id);
+	console.log(`[${interaction.message.id}] Request cleared by ${interaction.user.tag}`);
 }
 
 async function handleRequest(approved, interaction, sot_logs, help_desk) {
 	interaction.message.delete().catch(e => e);
 	interaction.client.timeouts.get(interaction.user.id)?.forEach(timeout => clearTimeout(timeout));
 
-	await editLogMessage(interaction.message.id, (approved) ? `Approved by ${interaction.user.username}#${interaction.user.discriminator}` : `Cancelled by ${interaction.user.username}#${interaction.user.discriminator}`, sot_logs);
+	await editLogMessage(interaction.message.id, (approved) ? `Approved by ${interaction.user.tag}` : `Cancelled by ${interaction.user.tag}`, sot_logs);
 	await notifyUser(interaction, approved, (approved) ? `your leaving request has been approved by ${interaction.member}\nPlease ensure you invite your replacement before heading out.` : `your leaving request was cancelled by ${interaction.member}\nIf you believe this was in error, please visit the ${help_desk}`);
 
 	const request = await getLeavingEntryByMessageID(interaction.message.id);
@@ -155,6 +177,9 @@ async function handleRequest(approved, interaction, sot_logs, help_desk) {
 
 		redis.expire(`approval:${request.requester}`, 60 * 30);
 	}
+
+	localLogMessages.delete(interaction.message.id);
+	console.log(`[${interaction.message.id}] Request ${(approved) ? 'approved' : 'cancelled'} by ${interaction.user.tag}`);
 }
 
 async function editLogMessage(messageId, message, log_channel) {

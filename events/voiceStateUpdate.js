@@ -111,6 +111,7 @@ async function no_leaving_request(voiceState, sot_logs) {
 
 	sot_logs.send({ embeds: [log_embed] });
 	ping_officer(sot_logs);
+	console.log(`${member} left ${voiceState.channel} without permission.`);
 }
 
 async function approved_to_leave(voiceState, sot_logs) {
@@ -125,11 +126,12 @@ async function approved_to_leave(voiceState, sot_logs) {
 	sot_logs.send({ embeds: [log_embed] });
 
 	redis.del(`approval:${member.id}`);
+	console.log(`${member} left ${voiceState.channel} after approval.`);
 }
 
 async function left_to_soon(voiceState, sot_logs) {
 	const { member } = voiceState;
-	const { created: created_iso } = await redis.hGetAll(`leaving_req:${member.id}`);
+	const created_iso = await redis.hGet(`leaving_req:${member.id}`, 'created');
 
 	const seconds_since_request = Math.floor((new Date().getTime() - new Date(created_iso).getTime()) / 1000);
 
@@ -146,6 +148,7 @@ async function left_to_soon(voiceState, sot_logs) {
 
 	redis.del(`warn_window:${member.id}`);
 	redis.del(`leaving_req:${member.id}`);
+	console.log(`${member} left ${voiceState.channel} after ${mm}m ${ss}s.`);
 }
 
 async function left_without_approval(voiceState, sot_logs) {
@@ -166,6 +169,7 @@ async function left_without_approval(voiceState, sot_logs) {
 
 	redis.del(`warn_window:${member.id}`);
 	redis.del(`leaving_req:${member.id}`);
+	console.log(`${member} left ${voiceState.channel} ${mm}m ${ss}s after requesting.`);
 }
 
 async function ping_officer(channel) {
