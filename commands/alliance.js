@@ -268,7 +268,7 @@ async function unlockServer(interaction) {
 	let channels = await getActiveShipChannels(unlock_category);
 
 	if (channels.size == 0) {
-		await interaction.guild.channels.fetch({ force: true });
+		await interaction.guild.channels.fetch('', { force: true });
 		channels = await getActiveShipChannels(unlock_category);
 		if (channels.size == 0) return await interaction.editReply(`Server \`${number}\` does not have any active ships!`);
 	}
