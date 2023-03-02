@@ -146,7 +146,7 @@ async function clearRequest(interaction, sot_logs) {
 	const log_message = await sot_logs.messages.fetch(log_message_id);
 
 	if (log_message) {
-		const log_embed = log_message.embeds.length && log_message.embeds[0];
+		const log_embed = 'embeds' in log_message && log_message.embeds.length && log_message.embeds[0];
 
 		if (!log_embed) return;
 
