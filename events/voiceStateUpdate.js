@@ -28,7 +28,7 @@ module.exports = {
 
 		const left_a_ship = channel_ids.includes(oldState?.channelId);
 
-		if (!left_a_ship && joined_help_desk && !is_on_duty) return console.log(`${oldState.member.tag} joined the help desk`);
+		if (!left_a_ship && joined_help_desk && !is_on_duty) return console.log(`${oldState.member.user.tag} joined the help desk`);
 		if (left_help_desk && !is_on_duty) return console.log(`${oldState.member.tag} left the help desk`);
 
 		if (!relates_to_a_ship) return;
