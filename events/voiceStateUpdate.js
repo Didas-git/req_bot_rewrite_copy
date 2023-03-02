@@ -8,7 +8,6 @@ module.exports = {
 	name: Events.VoiceStateUpdate,
 	once: false,
 	async execute(oldState, newState, client) {
-		console.log(users_visited_help_desk);
 		if (oldState.channelId == newState.channelId) return;
 
 		const categories = getCategories(newState.guild);
