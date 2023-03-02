@@ -44,8 +44,9 @@ async function leavingRequest(args, requester, leaving_channel, message, config)
 	const ping_role = guild.roles.cache.find(role => role.name == config.STAFF_PING_ROLE);
 	const help_desk = guild.channels.cache.find(channel => channel.name.endsWith(config.Mentions.channels.help_desk));
 
-	const playerLeaving = (args.length > 0) ? await guild.members.fetch(args[0].match(/\d+/)[0]) : await guild.members.fetch(requester);
-	if (!playerLeaving) return message.reply('Invalid player ID');
+	let playerLeaving = await guild.members.fetch(requester);
+	const otherPlayer = await guild.members.fetch(args[0].match(/\d+/));
+	if (otherPlayer) playerLeaving = otherPlayer[0];
 
 	const self_request = playerLeaving.id == requester.id;
 
