@@ -103,10 +103,8 @@ async function leavingRequest(args, requester, leaving_channel, message, config)
 	sot_leaving.send(`${ping_role}`).then(ping => ping.delete());
 
 	guild.client.timeouts.set(playerLeaving.id, [
-		setTimeout(() => officer_prompt.delete().catch(e => e), 1000 * 60 * 30),
 		setTimeout(() => {
-			log_embed.setFooter({ text: 'Expired' });
-			logs_message.edit({ embeds: [{ ...log_embed }] });
+			expireRequest(officer_prompt.id, sot_logs, sot_leaving);
 		}, 1000 * 60 * 30),
 	]);
 
@@ -157,6 +155,23 @@ async function clearRequest(interaction, sot_logs) {
 
 	localLogMessages.delete(interaction.message.id);
 	console.log(`[${interaction.message.id}] Request cleared by ${interaction.user.tag}`);
+}
+
+async function expireRequest(prompt_id, sot_logs, sot_leaving) {
+	const prompt_message = await sot_leaving.messages.fetch(prompt_id);
+	if (!prompt_message) return;
+
+	const log_message_id = localLogMessages.get(prompt_id);
+	prompt_message.delete().catch(e => e);
+
+	const log_message = await sot_logs.messages.fetch(log_message_id);
+	if (!log_message) return;
+
+	const log_embed = log_message.embeds[0];
+
+	log_embed.data.footer.text = 'Expired';
+	log_embed.data.timestamp = new Date().toISOString();
+	log_message.edit({ embeds: [log_embed] });
 }
 
 async function handleRequest(approved, interaction, sot_logs, help_desk) {
