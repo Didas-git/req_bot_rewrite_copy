@@ -34,7 +34,7 @@ module.exports = {
 		if (!relates_to_a_ship) return;
 
 		if (left_a_ship && joined_help_desk) {
-			if (!is_on_duty) console.log(`\`${oldState.member.user.tag}\` has joined the help desk from their alliance`);
+			if (!is_on_duty) console.log(`${oldState.member.user.tag} joined the help desk from their alliance`);
 			return users_visited_help_desk.set(oldState.id, oldState);
 		}
 
