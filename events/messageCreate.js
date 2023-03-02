@@ -158,16 +158,28 @@ async function clearRequest(interaction, sot_logs) {
 }
 
 async function expireRequest(prompt_id, sot_logs, sot_leaving) {
-	const prompt_message = await sot_leaving.messages.fetch(prompt_id);
-	if (!prompt_message) return;
+	let prompt_message = await sot_leaving.messages.fetch(prompt_id);
+
+	if (!prompt_message) {
+		await sot_leaving.messages.fetch('', { force: true });
+
+		prompt_message = await sot_leaving.messages.fetch(prompt_id);
+		if (!prompt_message) return;
+	}
 
 	const log_message_id = localLogMessages.get(prompt_id);
 	prompt_message.delete().catch(e => e);
 
-	const log_message = await sot_logs.messages.fetch(log_message_id);
-	if (!log_message) return;
+	let log_message = await sot_logs.messages.fetch(log_message_id);
+	if (!log_message) {
+		await sot_logs.messages.fetch('', { force: true });
 
-	const log_embed = log_message.embeds[0];
+		log_message = await sot_logs.messages.fetch(log_message_id);
+		if (!log_message) return;
+	}
+
+	const log_embed = log_message.embeds.length && log_message.embeds[0];
+	if (!log_embed) return;
 
 	log_embed.data.footer.text = 'Expired';
 	log_embed.data.timestamp = new Date().toISOString();
