@@ -28,13 +28,13 @@ module.exports = {
 
 		const left_a_ship = channel_ids.includes(oldState?.channelId);
 
-		if (!left_a_ship && joined_help_desk && !is_on_duty) return console.log(`${oldState.member} joined the help desk`);
-		if (left_help_desk && !is_on_duty) return console.log(`${oldState.member} left the help desk`);
+		if (!left_a_ship && joined_help_desk && !is_on_duty) return console.log(`${oldState.member.tag} joined the help desk`);
+		if (left_help_desk && !is_on_duty) return console.log(`${oldState.member.tag} left the help desk`);
 
 		if (!relates_to_a_ship) return;
 
 		if (left_a_ship && joined_help_desk) {
-			if (!is_on_duty) console.log(`\`${oldState.member.displayName}\` has joined the help desk from their alliance`);
+			if (!is_on_duty) console.log(`\`${oldState.member.tag}\` has joined the help desk from their alliance`);
 			return users_visited_help_desk.set(oldState.id, oldState);
 		}
 
@@ -134,7 +134,7 @@ async function no_leaving_request(voiceState, sot_logs) {
 
 	sot_logs.send({ embeds: [log_embed] });
 	ping_officer(sot_logs);
-	console.log(`${member} left ${voiceState.channel} without permission.`);
+	console.log(`${member.tag} left ${voiceState.channel.name} without permission.`);
 }
 
 async function approved_to_leave(voiceState, sot_logs) {
@@ -149,7 +149,7 @@ async function approved_to_leave(voiceState, sot_logs) {
 	sot_logs.send({ embeds: [log_embed] });
 
 	redis.del(`approval:${member.id}`);
-	console.log(`${member} left ${voiceState.channel} after approval.`);
+	console.log(`${member.tag} left ${voiceState.channel.name} after approval.`);
 }
 
 async function left_to_soon(voiceState, sot_logs) {
@@ -171,7 +171,7 @@ async function left_to_soon(voiceState, sot_logs) {
 
 	redis.del(`warn_window:${member.id}`);
 	redis.del(`leaving_req:${member.id}`);
-	console.log(`${member} left ${voiceState.channel} after ${mm}m ${ss}s.`);
+	console.log(`${member.tag} left ${voiceState.channel.name} after ${mm}m ${ss}s.`);
 }
 
 async function left_without_approval(voiceState, sot_logs) {
@@ -192,7 +192,7 @@ async function left_without_approval(voiceState, sot_logs) {
 
 	redis.del(`warn_window:${member.id}`);
 	redis.del(`leaving_req:${member.id}`);
-	console.log(`${member} left ${voiceState.channel} ${mm}m ${ss}s after requesting.`);
+	console.log(`${member.tag} left ${voiceState.channel.name} ${mm}m ${ss}s after requesting.`);
 }
 
 async function ping_officer(channel) {

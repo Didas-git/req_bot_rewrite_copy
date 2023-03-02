@@ -117,7 +117,7 @@ async function leavingRequest(args, requester, leaving_channel, message, config)
 		logs_message: logs_message.id,
 	};
 
-	console.log(`[${officer_prompt.id}] ${playerLeaving} is leaving - requested by ${requester}`);
+	console.log(`[${officer_prompt.id}] ${playerLeaving.tag} is leaving - requested by ${requester.tag}`);
 	localLogMessages.set(officer_prompt.id, logs_message.id);
 
 	await redis.hSet(`leaving_req:${playerLeaving.id}`, redis_hash);
