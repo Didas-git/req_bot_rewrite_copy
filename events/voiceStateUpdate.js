@@ -13,6 +13,7 @@ module.exports = {
 		const categories = getCategories(newState.guild);
 		const channel_ids = await Promise.all(categories.map(category => getServerShipChannels(category).then(server => server.map(channel => channel.id)))).then(ids => ids.flat());
 		const help_desk = oldState.guild.channels.cache.find(channel => channel.name.endsWith(client.config.Mentions.channels.help_desk));
+		const is_on_duty = oldState.member.roles.cache.find(role => role.name == client.config.STAFF_PING_ROLE);
 
 		let relates_to_a_ship = [oldState.channelId, newState.channelId].some(ship_channel_id => channel_ids.includes(ship_channel_id));
 		const [joined_help_desk, left_help_desk] = [newState.channelId == help_desk.id, oldState.channelId == help_desk.id];
@@ -27,13 +28,13 @@ module.exports = {
 
 		const left_a_ship = channel_ids.includes(oldState?.channelId);
 
-		if (!left_a_ship && joined_help_desk) return console.log(`${oldState.member} joined the help desk`);
-		if (left_help_desk) return console.log(`${oldState.member} left the help desk`);
+		if (!left_a_ship && joined_help_desk && !is_on_duty) return console.log(`${oldState.member} joined the help desk`);
+		if (left_help_desk && !is_on_duty) return console.log(`${oldState.member} left the help desk`);
 
 		if (!relates_to_a_ship) return;
 
 		if (left_a_ship && joined_help_desk) {
-			console.log(`\`${oldState.member.displayName}\` has joined the help desk from their alliance`);
+			if (!is_on_duty) console.log(`\`${oldState.member.displayName}\` has joined the help desk from their alliance`);
 			return users_visited_help_desk.set(oldState.id, oldState);
 		}
 
