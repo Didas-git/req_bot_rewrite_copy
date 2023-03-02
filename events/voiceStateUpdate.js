@@ -15,9 +15,10 @@ module.exports = {
 		const relates_to_a_ship = [oldState.channelId, newState.channelId].some(ship_channel_id => channel_ids.includes(ship_channel_id));
 		if (!relates_to_a_ship) return;
 		const joined_a_ship = channel_ids.includes(newState.channelId);
+		const joined_help_desk = newState.channelId == client.config.Channels.HELP_DESK;
 		const left_a_ship = channel_ids.includes(oldState.channelId);
 
-		if (left_a_ship) checkLeavingRequest(oldState, client);
+		if (!joined_help_desk && !joined_a_ship && left_a_ship) checkLeavingRequest(oldState, client);
 
 		if (joined_a_ship && !left_a_ship) joinedShip(newState);
 		if (!joined_a_ship && left_a_ship) await leftShip(oldState, { RECONNECT_MS: client.config.Settings.RECONNECT_MS });
