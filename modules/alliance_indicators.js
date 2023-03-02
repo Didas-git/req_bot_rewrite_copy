@@ -49,7 +49,7 @@ class StatusUpdater {
 
 		const active_ships = await this.getActiveShipChannels(category);
 		const status_indicator = await this.getStatusIndicator(category);
-		const new_name = (active_ships.size > 0) ? `🟢 SERVER ${category.server_number} [${active_ships.filter(channel => !channel.name.match(/\Whid(e|den)\W/i)).size} SHIPS]` : `🔴 SERVER ${category.server_number}`;
+		const new_name = (active_ships.filter(channel => !channel.name.match(/\Whid(e|den)\W/i)).size > 0) ? `🟢 SERVER ${category.server_number} [${active_ships.filter(channel => !channel.name.match(/\Whid(e|den)\W/i)).size} SHIPS]` : `🔴 SERVER ${category.server_number}`;
 		if (status_indicator.name == new_name) return;
 		status_indicator.setName(new_name, 'Status Indicator');
 	}
