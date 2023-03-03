@@ -87,7 +87,7 @@ async function leftShip(state, options) {
 }
 
 async function removeChannelPermission(state, options) {
-	accessTimers.set(`${state.channelId}:${state.member.id}`, setTimeout(() => state.channel.permissionOverwrites.delete(state.member.id, 'Left a ship'), options.RECONNECT_MS));
+	accessTimers.set(`${state.channel.id}:${state.member.id}`, setTimeout(() => state.channel.permissionOverwrites.delete(state.member.id, 'Left a ship'), options.RECONNECT_MS));
 }
 
 async function movedShip(oldState, newState) {
