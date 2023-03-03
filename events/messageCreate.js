@@ -18,7 +18,6 @@ module.exports = {
 
 		if (member.bot) return;
 		if (channel.type !== ChannelType.GuildText) return;
-		if (!channel.name.toLowerCase().endsWith('_leaving')) return;
 		if (!message.content.startsWith('?')) return;
 
 		const splitMessage = message.content.split(' ');
@@ -32,11 +31,26 @@ module.exports = {
 		switch (command) {
 
 		case 'leaving':
+			if (!channel.name.toLowerCase().endsWith('_leaving')) return;
 			leavingRequest(args, member, channel, message, config, client);
+			break;
+
+		case 'msota':
+			msota(args, channel, message);
 			break;
 		}
 	},
 };
+
+async function msota(args, channel, message) {
+	const { guild } = channel;
+	let server = args && args[0];
+	if (isNaN(server)) server = channel.name.match(/\d+/)[0] ?? null;
+	const sota_role = guild.roles.cache.find(role => role.name == `SOTA-${server}`);
+	if (!sota_role) return channel.send('Invalid server.').then(response => setTimeout(() => response.delete(), 5000));
+	message.delete();
+	await channel.send(`<@&${sota_role.id}>`).then(response => setTimeout(() => response.delete(), 1000));
+}
 
 async function dummyRequest(message, playerLeaving, leaving_channel, sot_leaving) {
 	const prompt_embed = new EmbedBuilder()
