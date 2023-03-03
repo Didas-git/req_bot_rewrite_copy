@@ -138,7 +138,7 @@ async function leavingRequest(args, requester, leaving_channel, message, config)
 
 	guild.client.timeouts.set(playerLeaving.id, [
 		setTimeout(() => {
-			expireRequest(officer_prompt.id, sot_logs, sot_leaving);
+			expireRequest(playerLeaving.id, officer_prompt.id, sot_logs, sot_leaving, leaving_channel.id, user_message.id);
 		}, 1000 * 60 * 30),
 	]);
 
@@ -193,7 +193,7 @@ async function clearRequest(interaction, sot_logs) {
 	console.log(`[${interaction.message.id}] Request cleared by ${interaction.user.tag}`);
 }
 
-async function expireRequest(prompt_id, sot_logs, sot_leaving) {
+async function expireRequest(member_id, prompt_id, sot_logs, sot_leaving, leaving_channel_id, user_message_id) {
 	let prompt_message = await sot_leaving.messages.fetch(prompt_id);
 
 	if (!prompt_message) {
@@ -202,6 +202,39 @@ async function expireRequest(prompt_id, sot_logs, sot_leaving) {
 		prompt_message = await sot_leaving.messages.fetch(prompt_id);
 		if (!prompt_message) return;
 	}
+
+	let leaving_channel = await sot_leaving.guild.channels.fetch(leaving_channel_id);
+	if (!leaving_channel) {
+		await sot_leaving.messages.fetch('', { force: true });
+
+		leaving_channel = await sot_leaving.guild.channels.fetch(leaving_channel_id);
+		if (!leaving_channel) return;
+	}
+
+	let user_message = await leaving_channel.messages.fetch(user_message_id);
+	if (!user_message) {
+		await leaving_channel.messages.fetch('', { force: true });
+
+		user_message = await leaving_channel.messages.fetch(user_message_id);
+		if (!user_message) return;
+	}
+
+	const user_embed = 'embeds' in user_message && user_message.embeds.length && user_message.embeds[0];
+
+	if (!user_embed) return;
+
+	user_embed.data.description = user_embed.data.description.replace(/Expires: <t:\d+:R>/i, '');
+	user_embed.data.description = user_embed.data.description.replace('Leaving Request Received', 'Leaving Request Expired');
+	Object.assign(user_embed.data, { footer: { text: 'Expired' }, timestamp: new Date().toISOString() });
+	user_message.edit({ embeds: [user_embed] });
+
+	const expired_embed = new EmbedBuilder()
+		.setTitle('Leaving Request Expired')
+		.setDescription(`<@${member_id}>, your leaving request has expired.\nPlease submit another unless you intend to continue playing.`)
+		.setColor('e62600');
+
+	user_message.reply({ embeds: [expired_embed] });
+	leaving_channel.send(`<@${member_id}>`).then(ping => ping.delete());
 
 	const log_message_id = localLogMessages.get(prompt_id);
 	prompt_message.delete().catch(e => e);
@@ -220,6 +253,9 @@ async function expireRequest(prompt_id, sot_logs, sot_leaving) {
 	log_embed.data.footer.text = 'Expired';
 	log_embed.data.timestamp = new Date().toISOString();
 	log_message.edit({ embeds: [log_embed] });
+
+	sot_leaving.guild.members.fetch(member_id)
+		.then(member => console.log(`[${prompt_id}] Request expired for ${member.user.tag}`));
 }
 
 async function handleRequest(approved, interaction, sot_logs, help_desk) {
