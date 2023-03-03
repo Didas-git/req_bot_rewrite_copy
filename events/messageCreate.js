@@ -83,7 +83,7 @@ async function leavingRequest(args, requester, leaving_channel, message, config)
 	const self_request = playerLeaving.id == requester.id || !playerLeaving;
 
 	const is_on_duty = playerLeaving.roles.cache.has(ping_role.id);
-	const is_on_ship = playerLeaving.voice && playerLeaving.voice.channel.name.match(/-(\w{1,3})]/i)?.length > 1;
+	const is_on_ship = playerLeaving.voice && playerLeaving.voice.channel && playerLeaving.voice.channel.name.match(/-(\w{1,3})]/i)?.length > 1;
 	if (!is_on_ship) return leaving_channel.send(`${requester}\n${(self_request) ? 'You are' : 'That player is'} not on a ship.${(is_on_duty ? '\n*Don\'t forget to rename the channel!*' : '')}`).then(response => setTimeout(() => response.delete(), 5000)).then(() => message.delete());
 
 	if (is_on_duty) return dummyRequest(message, playerLeaving, leaving_channel, sot_leaving);
