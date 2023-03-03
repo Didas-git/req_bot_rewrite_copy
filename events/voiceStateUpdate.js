@@ -82,7 +82,7 @@ async function leftShip(state, options) {
 
 	if (!options?.skipRemoveSotaRole) state.member.roles.remove(sota_role, 'Left a ship');
 	if (!options?.RECONNECT_MS) return state.channel.permissionOverwrites.delete(state.member, 'Left a ship');
-	accessTimers.set(`${state.channelId}:${state.member.id}`, setTimeout(() => state.channel.permissionOverwrites.delete(state.member, 'Left a ship'), options.RECONNECT_MS));
+	accessTimers.set(`${state.channelId}:${state.member.id}`, setTimeout(() => state.channel.permissionOverwrites.delete(state.member.id, 'Left a ship'), options.RECONNECT_MS));
 }
 
 async function movedShip(oldState, newState) {
