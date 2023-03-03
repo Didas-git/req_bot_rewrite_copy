@@ -29,7 +29,7 @@ module.exports = {
 		const left_a_ship = channel_ids.includes(oldState?.channelId);
 
 		if (!left_a_ship && joined_help_desk && !is_on_duty) return console.log(`${oldState.member.user.tag} joined the help desk`);
-		if (left_help_desk && !is_on_duty) return console.log(`${oldState.member.user.tag} left the help desk`);
+		if (left_help_desk && !is_on_duty) console.log(`${oldState.member.user.tag} left the help desk`);
 
 		if (!relates_to_a_ship) return;
 
@@ -38,10 +38,10 @@ module.exports = {
 			return users_visited_help_desk.set(oldState.id, oldState);
 		}
 
-		if (left_help_desk && joined_a_ship) return users_visited_help_desk.delete(newState.id);
+		if (left_help_desk && joined_a_ship && users_visited_help_desk.has(newState.member.id)) return users_visited_help_desk.delete(newState.member.id);
 
+		if (is_on_duty) return;
 		if (left_a_ship) checkLeavingRequest(oldState, client);
-
 		if (joined_a_ship && !left_a_ship) joinedShip(newState);
 		if (!joined_a_ship && left_a_ship) await leftShip(oldState, { RECONNECT_MS: client.config.Settings.RECONNECT_MS });
 		if (joined_a_ship && left_a_ship) await movedShip(oldState, newState);
@@ -72,22 +72,19 @@ function joinedShip(state) {
 }
 
 async function leftShip(state, options) {
-	let channel = state.channel;
-	if (!channel) {
-		channel = await state.guild.channels.fetch(state.channel);
-		if (!channel) return;
-	}
+	const channel = state.channel && await state.guild.channels.fetch(state.channel.id);
+	if (!channel) return;
 
 	const server_number = channel.name.match(/\d+/)[0];
 	const sota_role = state.guild.roles.cache.find(role => role.name == `SOTA-${server_number}`);
 
-	if (!options?.skipRemoveSotaRole) state.member.roles.remove(sota_role, 'Left a ship');
-	if (!options?.RECONNECT_MS) return state.channel.permissionOverwrites.delete(state.member, 'Left a ship');
+	if (!('skipRemoveSotaRole' in options)) state.member.roles.remove(sota_role, 'Left a ship');
+	if (!('RECONNECT_MS' in options)) return state.channel.permissionOverwrites.delete(state.member, 'Left a ship');
 
 	removeChannelPermission(state.client, state.member.id, channel.id, options);
 }
 
-async function removeChannelPermission(client, member_id, channel_id, options) {
+function removeChannelPermission(client, member_id, channel_id, options) {
 	accessTimers.set(`${channel_id}:${member_id}`, setTimeout(async () => {
 		const channel = await client.channels.fetch(channel_id);
 		channel.permissionOverwrites.delete(member_id, 'Left a ship');
@@ -104,7 +101,6 @@ async function movedShip(oldState, newState) {
 
 async function checkLeavingRequest(voiceState, client) {
 	const { member } = voiceState;
-	if (member.roles.cache.find(role => role.name == client.config.STAFF_PING_ROLE)) return;
 
 	const sot_logs = voiceState.guild.channels.cache.find(channel => channel.name == client.config.Mentions.channels.sot_logs);
 	const sot_leaving = voiceState.guild.channels.cache.find(channel => channel.name == client.config.Mentions.channels.sot_leaving);
