@@ -72,7 +72,7 @@ function joinedShip(state) {
 }
 
 async function leftShip(state, options) {
-	const channel = state.channel && await state.guild.channels.fetch(state.channel.id);
+	const channel = state.channel && state.channel.id && await state.guild.channels.fetch(state.channel.id);
 	if (!channel) return;
 
 	const server_number = channel.name.match(/\d+/)[0];
@@ -81,12 +81,18 @@ async function leftShip(state, options) {
 	if (!('skipRemoveSotaRole' in options)) state.member.roles.remove(sota_role, 'Left a ship');
 	if (!('RECONNECT_MS' in options)) return state.channel.permissionOverwrites.delete(state.member, 'Left a ship');
 
-	removeChannelPermission(state.client, state.member.id, channel.id, options);
+	removeChannelPermission(state.client, state.member.id, channel.id, options, state);
 }
 
-function removeChannelPermission(client, member_id, channel_id, options) {
+function removeChannelPermission(client, member_id, channel_id, options, state) {
 	accessTimers.set(`${channel_id}:${member_id}`, setTimeout(async () => {
-		const channel = await client.channels.fetch(channel_id);
+		let channel = await client.channels.fetch(channel_id).catch(async () => {
+			await client.channels.fetch();
+			return await client.channels.fetch(channel_id).catch(e => e);
+		});
+
+		if (!channel || channel instanceof Error) channel = state.channel && state.channel;
+		if (!channel) return;
 		channel.permissionOverwrites.delete(member_id, 'Left a ship');
 	}, options.RECONNECT_MS));
 }
