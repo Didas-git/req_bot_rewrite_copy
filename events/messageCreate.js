@@ -272,6 +272,7 @@ async function handleRequest(approved, interaction, sot_logs, help_desk) {
 	await notifyUser(interaction, approved, (approved) ? `your leaving request has been approved by ${interaction.member}\nPlease ensure you invite your replacement before heading out.` : `your leaving request was cancelled by ${interaction.member}\nIf you believe this was in error, please visit the ${help_desk}`);
 
 	const request = await getLeavingEntryByMessageID(interaction.message.id);
+	if (!request || !('requester' in request)) return;
 	redis.del(`leaving_req:${request.requester}`);
 	redis.del(`warn_window:${request.requester}`);
 
