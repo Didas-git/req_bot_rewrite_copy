@@ -319,6 +319,8 @@ async function getLeavingEntryByMessageID(messageID) {
 
 async function notifyUser(interaction, approved, messageContent) {
 	const request = await getLeavingEntryByMessageID(interaction.message.id);
+	if (!request) return;
+
 	const request_channel = await interaction.guild.channels.fetch(request.request_channel);
 	const user_message = await request_channel.messages.fetch(request.message);
 	const member = await interaction.guild.members.fetch(request.user);

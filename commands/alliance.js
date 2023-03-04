@@ -195,6 +195,11 @@ async function removeServer(interaction) {
 	if (!delete_category) return interaction.editReply(`Server \`${number}\` does not exist!`);
 	const old_position = delete_category.position;
 
+	await interaction.editReply('Check if voice channels empty...');
+	const voice_channels = delete_category.children.cache.filter(channel => channel.type == ChannelType.GuildVoice);
+	const voice_channels_empty = voice_channels.every(channel => channel.members.size == 0);
+	if (!voice_channels_empty) return interaction.editReply('There are still members in the ship channels!');
+
 	await interaction.editReply('Delete channels...');
 	await Promise.all(delete_category.children.cache.map(child => child.delete(`Removing alliance server (${interaction.member.displayName} - ${interaction.member.id})`)));
 	await delete_category.delete(`Removing alliance server (${interaction.member.displayName} - ${interaction.member.id})`);
