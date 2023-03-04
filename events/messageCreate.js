@@ -194,7 +194,13 @@ async function clearRequest(interaction, sot_logs) {
 }
 
 async function expireRequest(member_id, prompt_id, sot_logs, sot_leaving, leaving_channel_id, user_message_id) {
-	let prompt_message = await sot_leaving.messages.fetch(prompt_id);
+	let prompt_message;
+	try {
+		prompt_message = await sot_leaving.messages.fetch(prompt_id);
+	}
+	catch (e) {
+		return;
+	}
 
 	if (!prompt_message) {
 		await sot_leaving.messages.fetch('', { force: true });
