@@ -50,7 +50,7 @@ module.exports = {
 		await interaction.deferReply();
 
 		// channel name starts with N- where N is a number
-		if (!interaction.channel.name.match(/^\d+-/).length) return interaction.editReply('Please run this in a commands channel.');
+		if (interaction.channel.name.match(/^\d+-/)) return interaction.editReply('Please run this in a commands channel.');
 
 		switch (interaction.options.getSubcommand()) {
 
