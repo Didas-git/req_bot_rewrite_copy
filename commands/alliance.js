@@ -49,6 +49,9 @@ module.exports = {
 	async execute(interaction, client) {
 		await interaction.deferReply();
 
+		// channel name starts with N- where N is a number
+		if (!interaction.channel.name.match(/^\d+-/)) return interaction.editReply('Please run this in a commands channel.');
+
 		switch (interaction.options.getSubcommand()) {
 
 		case 'create': {
@@ -174,7 +177,6 @@ async function createServer(interaction, client) {
 
 	await interaction.editReply('Parse permissions...');
 	const permissions = parsePermissions(interaction, role);
-	console.log(permissions);
 
 	await interaction.editReply('Create category...');
 	const category = await createServerCategory(interaction, number.toString());
@@ -185,7 +187,23 @@ async function createServer(interaction, client) {
 	await interaction.editReply('Create channels...');
 	await createChannels(interaction, number, category, permissions);
 
+	await interaction.editReply('Post embeds...');
+	await postEmbeds(interaction, category);
+
 	await interaction.editReply('Finished creating server!');
+}
+
+async function postEmbeds(interaction, category) {
+	const { children: channels } = category;
+	const config = interaction.client.config;
+	const chat_channel = channels.cache.find(channel => channel.name.toLowerCase().includes('_chat'));
+	const emissary_channel = channels.cache.find(channel => channel.name.toLowerCase().includes('_emissary'));
+
+	const chat_embeds = [config.Embeds.sell_rotation, config.Embeds.best_practices];
+	const emissary_embed = [config.Embeds.emissary];
+
+	await chat_channel.send({ embeds: chat_embeds }).then(msg => msg.pin());
+	await emissary_channel.send({ embeds: emissary_embed }).then(msg => msg.pin());
 }
 
 async function removeServer(interaction) {
