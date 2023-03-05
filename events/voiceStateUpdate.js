@@ -78,8 +78,8 @@ async function leftShip(state, options) {
 	const server_number = channel.name.match(/\d+/)[0];
 	const sota_role = state.guild.roles.cache.find(role => role.name == `SOTA-${server_number}`);
 
-	if (!('skipRemoveSotaRole' in options)) state.member.roles.remove(sota_role, 'Left a ship');
-	if (!('RECONNECT_MS' in options)) return state.channel.permissionOverwrites.delete(state.member, 'Left a ship');
+	if (!options || !('skipRemoveSotaRole' in options)) state.member.roles.remove(sota_role, 'Left a ship');
+	if (!options || !('RECONNECT_MS' in options)) return state.channel.permissionOverwrites.delete(state.member, 'Left a ship');
 
 	removeChannelPermission(state.client, state.member.id, channel.id, options, state);
 }
