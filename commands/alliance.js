@@ -49,8 +49,8 @@ module.exports = {
 	async execute(interaction, client) {
 		await interaction.deferReply();
 
-		// channel name starts with N- where N is a number
-		if (interaction.channel.name.match(/^\d+-/)) return interaction.editReply('Please run this in a commands channel.');
+		// channel name matches format serverX_ where X is a number
+		if (interaction.channel.name.match(/^server\d+_/)) return interaction.editReply('Please run this in a commands channel.');
 
 		switch (interaction.options.getSubcommand()) {
 
