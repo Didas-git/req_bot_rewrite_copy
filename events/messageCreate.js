@@ -243,6 +243,7 @@ async function expireRequest(member_id, prompt_id, sot_logs, sot_leaving, leavin
 	leaving_channel.send(`<@${member_id}>`).then(ping => ping.delete());
 
 	const log_message_id = localLogMessages.get(prompt_id);
+	if (!log_message_id) return;
 	prompt_message.delete().catch(e => e);
 
 	let log_message = await sot_logs.messages.fetch(log_message_id).catch(e => e);
