@@ -28,6 +28,8 @@ module.exports = {
 
 		const left_a_ship = channel_ids.includes(oldState?.channelId);
 
+		if (joined_help_desk && !is_on_duty) helpDeskNotification(newState, client);
+
 		if (!left_a_ship && joined_help_desk && !is_on_duty) return console.log(`${oldState.member.user.tag} joined the help desk`);
 		if (left_help_desk && !is_on_duty) console.log(`${oldState.member.user.tag} left the help desk`);
 
@@ -48,6 +50,23 @@ module.exports = {
 	},
 };
 
+
+async function helpDeskNotification(state, client) {
+	const sot_logs = state.guild.channels.cache.find(channel => channel.name == client.config.Mentions.channels.sot_logs);
+	const help_desk = state.guild.channels.cache.find(channel => channel.name.endsWith(client.config.Mentions.channels.help_desk));
+	const officers = help_desk.members.filter(member => member.roles.cache.find(role => role.name == client.config.STAFF_PING_ROLE));
+	const upper_staff = client.config.MANAGER_ROLE_NAMES.some(role_name => help_desk.members.filter(member => member.roles.cache.find(role => role.name == role_name)).size);
+	const ping_role = state.guild.roles.cache.find(role => role.name == client.config.STAFF_PING_ROLE);
+
+	if (officers.size || upper_staff) return;
+
+	const helpDeskEmbed = new EmbedBuilder()
+		.setDescription(`**${state.member} joined the help desk without a staff member present.**`)
+		.setColor('e62600');
+
+	sot_logs.send({ embeds: [helpDeskEmbed] });
+	sot_logs.send(`${ping_role}`).then(ping => ping.delete());
+}
 
 function getCategories(guild) {
 	const categories = guild.channels.cache.filter(channel => channel.type === ChannelType.GuildCategory && channel.name.toLowerCase().includes('sot alliance '));

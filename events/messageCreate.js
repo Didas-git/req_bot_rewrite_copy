@@ -76,8 +76,8 @@ async function leavingRequest(args, requester, leaving_channel, message, config)
 	const help_desk = guild.channels.cache.find(channel => channel.name.endsWith(config.Mentions.channels.help_desk));
 	const sot_leaving = guild.channels.cache.find(channel => channel.name == config.Mentions.channels.sot_leaving);
 
-	let playerLeaving = await guild.members.fetch(requester).catch(e => e);
-	const otherPlayer = args.length && args[0].match(/\d+/) && await guild.members.fetch(args[0].match(/\d+/)).catch(e => e);
+	let playerLeaving = await guild.members.fetch(requester).catch(() => null);
+	const otherPlayer = await (args.length && args[0].match(/\d+/) && guild.members.fetch(args[0].match(/\d+/)[0]).catch(() => null));
 	if (otherPlayer) playerLeaving = otherPlayer;
 
 	const self_request = playerLeaving.id == requester.id || !playerLeaving;
