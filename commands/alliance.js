@@ -198,12 +198,15 @@ async function postEmbeds(interaction, category) {
 	const config = interaction.client.config;
 	const chat_channel = channels.cache.find(channel => channel.name.toLowerCase().includes('_chat'));
 	const emissary_channel = channels.cache.find(channel => channel.name.toLowerCase().includes('_emissary'));
+	const leaving_channel = channels.cache.find(channel => channel.name.toLowerCase().includes('_leaving'));
 
 	const chat_embeds = [config.Embeds.sell_rotation, config.Embeds.best_practices];
 	const emissary_embed = [config.Embeds.emissary];
+	const leaving_embed = [config.Embeds.leaving];
 
 	await chat_channel.send({ embeds: chat_embeds }).then(msg => msg.pin());
 	await emissary_channel.send({ embeds: emissary_embed }).then(msg => msg.pin());
+	await leaving_channel.send({ embeds: leaving_embed }).then(msg => msg.pin());
 }
 
 async function removeServer(interaction) {
