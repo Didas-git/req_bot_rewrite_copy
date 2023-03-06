@@ -165,7 +165,7 @@ async function leavingRequest(args, requester, leaving_channel, message, config)
 
 	await redis.hSet(`leaving_req:${playerLeaving.id}`, redis_hash);
 
-	message.delete().catch(e => e);
+	await message.delete().catch(e => e);
 
 	redis.expire(`leaving_req:${playerLeaving.id}`, 60 * 30);
 	redis.set(`warn_window:${playerLeaving.id}`, `${Date.now() + (1000 * 60 * 10)}`, { EX: 60 * 10 });
@@ -187,7 +187,7 @@ async function updatePromptColours(leaving_ship, sot_leaving, options) {
 		const embed = message.embeds[0];
 
 		embed.data.color = parseInt(colour, 16);
-		message.edit({ embeds: [embed] });
+		message.edit({ embeds: [embed] }).catch(() => null);
 	});
 }
 
