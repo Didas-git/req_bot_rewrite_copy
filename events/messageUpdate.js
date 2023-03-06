@@ -22,7 +22,7 @@ module.exports = {
 		const officer_role = oldMessage.guild.roles.cache.find(role => role.name == client.config.Mentions.roles.officer);
 		const role_members = officer_role.members.map(member => member.user.id);
 
-		outEmbed.data.fields = outEmbed.data.fields.filter(field => !field.value.hasAny(role_members));
+		outEmbed.data.fields = outEmbed.data.fields.filter(field => !role_members.some(id => field.value.includes(id)));
 
 		if (!embeds.length) return;
 		const sot_leaving = oldMessage.guild.channels.cache.find(channel => channel.name == client.config.Mentions.channels.sot_leaving);
