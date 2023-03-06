@@ -17,14 +17,14 @@ module.exports = {
 			.setColor('e7c200');
 
 		outEmbed.data.fields = [...embeds[0].data.fields, ...embeds[1].data.fields];
-		outEmbed.data.fields.forEach(field => field.value = field.value.replace(/`\d\W`/i, ''));
+		outEmbed.data.fields.forEach(field => field.value = field.value.replace(/`\d\W`/gi, ''));
 
 		if (!embeds.length) return;
 		const sot_leaving = oldMessage.guild.channels.cache.find(channel => channel.name == client.config.Mentions.channels.sot_leaving);
 		if (!sot_leaving) return;
 		let queue_message = await sot_leaving.messages.fetch().then(leaving_messages => leaving_messages.last());
 
-		const embedContent = 'This channel will now only show spots that need filling, you can view the #:ocean:logs for a full history.\n\n__**What each button means**__\n> :green_circle: **Approve**\n> The member is granted permission to leave the ship immediately.\n> \n> :red_circle: **Cancel**\n> The leaving request is cancelled, if they leave, officers will be notified.\n> \n> :white_circle: **Clear**\n> The member left with a request still pending, click when the spot is filled.\n\n__**What the request colours mean**__\n> :yellow_circle:  **Yellow**\n> There is one leaving request for this specific ship.\n> \n> :orange_circle:  **Amber**\n> There is two leaving requests for this specific ship.\n> \n> :red_circle:  **Red**\n> There is three or more leaving requests for this ship.\n\n*Dummy (officer) requests will not update colour when cleared*';
+		const embedContent = '__**What each button means**__\n> :green_circle: **Approve**\n> The member is granted permission to leave the ship immediately.\n> \n> :red_circle: **Cancel**\n> The leaving request is cancelled, if they leave, officers will be notified.\n> \n> :white_circle: **Clear**\n> The member left with a request still pending, click when the spot is filled.\n\n__**What the request colours mean**__\n> :yellow_circle:  **Yellow**\n> There is one leaving request for this specific ship.\n> \n> :orange_circle:  **Amber**\n> There is two leaving requests for this specific ship.\n> \n> :red_circle:  **Red**\n> There is three or more leaving requests for this ship.\n\n*Dummy (officer) requests will not update colour when cleared*';
 
 		if (!queue_message) queue_message = await sot_leaving.send({ content: embedContent, embeds: [outEmbed] });
 		return queue_message.edit({ content: embedContent, embeds: [outEmbed] });
