@@ -22,7 +22,7 @@ module.exports = {
 		outEmbed.data.fields = [...embeds[0].data.fields, ...embeds[1].data.fields];
 		outEmbed.data.fields.forEach(field => field.value = field.value.replace(/`\d+\W+`/gi, '').replace(/<t:\d+:R>/gi, ''));
 
-		outEmbed.data.fields.forEach(field => {
+		outEmbed.data.fields = outEmbed.data.fields.map(field => {
 			const split = field.value.split('\n');
 			const filtered = split.filter(line => !role_member_ids.some(id => line.includes(id)));
 			return filtered.map((line, index) => `\`${index}\`${line}`).join('\n');
