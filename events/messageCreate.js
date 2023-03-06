@@ -4,6 +4,12 @@ const redis = require('../modules/redis');
 let listener_attached;
 const localLogMessages = new Map();
 
+const leaving_colours = {
+	1: 'e7c200',
+	2: 'e66700',
+	3: 'e62600',
+};
+
 module.exports = {
 	name: Events.MessageCreate,
 	once: false,
@@ -138,7 +144,7 @@ async function leavingRequest(args, requester, leaving_channel, message, config)
 
 	guild.client.timeouts.set(playerLeaving.id, [
 		setTimeout(() => {
-			expireRequest(playerLeaving.id, officer_prompt.id, sot_logs, sot_leaving, leaving_channel.id, user_message.id);
+			expireRequest(playerLeaving.id, officer_prompt.id, sot_logs, sot_leaving, leaving_channel.id, user_message.id, playerLeaving.voice.channel);
 		}, 1000 * 60 * 30),
 	]);
 
@@ -149,6 +155,7 @@ async function leavingRequest(args, requester, leaving_channel, message, config)
 		message: user_message.id,
 		prompt_message: officer_prompt.id,
 		logs_message: logs_message.id,
+		ship_channel: playerLeaving.voice.channel.id,
 	};
 
 	console.log(`[${officer_prompt.id}] ${playerLeaving.user.tag} is leaving - requested by ${requester.tag}`);
@@ -160,6 +167,26 @@ async function leavingRequest(args, requester, leaving_channel, message, config)
 
 	redis.expire(`leaving_req:${playerLeaving.id}`, 60 * 30);
 	redis.set(`warn_window:${playerLeaving.id}`, `${Date.now() + (1000 * 60 * 10)}`, { EX: 60 * 10 });
+
+	updatePromptColours(playerLeaving.voice.channel, sot_leaving);
+}
+
+async function updatePromptColours(leaving_ship, sot_leaving) {
+	const all_prompt_messages = await sot_leaving.messages.fetch({ limit: 100 }).catch(e => console.error(e));
+
+	const prompt_messages = all_prompt_messages.filter(message => message.embeds.length > 0 && message.embeds[0].description.includes(leaving_ship.id));
+
+	if (!prompt_messages) return;
+
+	const colour = leaving_colours[(prompt_messages.size > 3) ? 3 : prompt_messages.size];
+
+	prompt_messages.forEach(message => {
+		const embed = message.embeds[0];
+
+		embed.data.color = parseInt(colour, 16);
+		console.log(embed.data.color);
+		message.edit({ embeds: [embed] });
+	});
 }
 
 async function handleInteraction(interaction) {
@@ -167,10 +194,16 @@ async function handleInteraction(interaction) {
 
 	const sot_logs = interaction.guild.channels.cache.find(channel => channel.name == interaction.client.config.Mentions.channels.sot_logs);
 	const help_desk = interaction.guild.channels.cache.find(channel => channel.name.endsWith(interaction.client.config.Mentions.channels.help_desk));
+	const sot_leaving = interaction.guild.channels.cache.find(channel => channel.name == interaction.client.config.Mentions.channels.sot_leaving);
 
-	if (interaction.customId == 'leaving_approve') handleRequest(true, interaction, sot_logs);
-	if (interaction.customId == 'leaving_cancel') handleRequest(false, interaction, sot_logs, help_desk);
-	if (interaction.customId == 'leaving_clear') clearRequest(interaction, sot_logs);
+	const request = await getLeavingEntryByMessageID(interaction.message.id);
+
+	if (interaction.customId == 'leaving_approve') await handleRequest(true, interaction, sot_logs, sot_leaving);
+	if (interaction.customId == 'leaving_cancel') await handleRequest(false, interaction, sot_logs, help_desk, sot_leaving);
+	if (interaction.customId == 'leaving_clear') await clearRequest(interaction, sot_logs);
+
+	const ship_channel = interaction.guild.channels.cache.get(request.ship_channel);
+	updatePromptColours(ship_channel, sot_leaving);
 }
 
 async function clearRequest(interaction, sot_logs) {
@@ -193,7 +226,7 @@ async function clearRequest(interaction, sot_logs) {
 	console.log(`[${interaction.message.id}] Request cleared by ${interaction.user.tag}`);
 }
 
-async function expireRequest(member_id, prompt_id, sot_logs, sot_leaving, leaving_channel_id, user_message_id) {
+async function expireRequest(member_id, prompt_id, sot_logs, sot_leaving, leaving_channel_id, user_message_id, leaving_ship) {
 	let prompt_message;
 	try {
 		prompt_message = await sot_leaving.messages.fetch(prompt_id).catch(e => e);
@@ -263,6 +296,8 @@ async function expireRequest(member_id, prompt_id, sot_logs, sot_leaving, leavin
 
 	sot_leaving.guild.members.fetch(member_id)
 		.then(member => console.log(`[${prompt_id}] Request expired for ${member.user.tag}`));
+
+	updatePromptColours(leaving_ship, sot_leaving);
 }
 
 async function handleRequest(approved, interaction, sot_logs, help_desk) {

@@ -226,8 +226,9 @@ async function removeServer(interaction) {
 	await delete_category.delete(`Removing alliance server (${interaction.member.displayName} - ${interaction.member.id})`);
 
 	await interaction.editReply('Delete role...');
-	const delete_role = await interaction.guild.roles.cache.find(role => role.name == `SOTA-${number}`);
-	await delete_role.delete(`Removing alliance server (${interaction.member.displayName} - ${interaction.member.id})`);
+	let delete_role = await interaction.guild.roles.cache.find(role => role.name == `SOTA-${number}`);
+	if (!delete_role) interaction.guild.roles.fetch().then(roles => delete_role = roles.cache.find(role => role.name == `SOTA-${number}`));
+	await delete_role?.delete(`Removing alliance server (${interaction.member.displayName} - ${interaction.member.id})`);
 
 	await interaction.editReply('Rename other servers...');
 	const rename_category = getCategories(interaction).first();
