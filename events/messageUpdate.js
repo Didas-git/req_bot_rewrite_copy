@@ -5,7 +5,7 @@ module.exports = {
 	once: false,
 	async execute(oldMessage, newMessage, client) {
 		if (!oldMessage.channel.name.endsWith('waiting_queue')) return;
-		const messages = await oldMessage.channel.messages.fetch().then(queue_messages => queue_messages.array().slice(-2));
+		const messages = await oldMessage.channel.messages.fetch().then(queue_messages => queue_messages.first(2));
 		if (!messages) return;
 		const embeds = messages.reduce((acc, msg) => msg.embeds.length && acc.concat(msg.embeds[0]), []);
 		if (!embeds.length) return;
