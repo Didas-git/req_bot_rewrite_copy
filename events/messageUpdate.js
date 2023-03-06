@@ -25,7 +25,7 @@ module.exports = {
 		outEmbed.data.fields.forEach(field => {
 			const split = field.value.split('\n');
 			const filtered = split.filter(line => !role_member_ids.some(id => line.includes(id)));
-			if (!filtered.length) return field.falue = 'Empty';
+			console.log(filtered);
 			field.value = filtered.map((line, index) => `\`${index + 1}\`${line}`).join('\n');
 		});
 
