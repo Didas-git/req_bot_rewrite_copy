@@ -17,15 +17,16 @@ module.exports = {
 			.setColor('e7c200');
 
 		const officer_role = oldMessage.guild.roles.cache.find(role => role.name == client.config.Mentions.roles.officer);
-		const role_member_ids = officer_role.members.map(member => member.user.id);
+		const role_member_ids = officer_role.members.map(member => member.id);
 
 		outEmbed.data.fields = [...embeds[0].data.fields, ...embeds[1].data.fields];
 		outEmbed.data.fields.forEach(field => field.value = field.value.replace(/`\d+\W+`/gi, '').replace(/<t:\d+:R>/gi, ''));
 
-		const field_lines = outEmbed.data.fields.map(field => field.value.split('\n'));
-		const filtered_field_lines = field_lines.filter(line => !role_member_ids.some(id => line.includes(id))).map((line, index) => `\`${index}\`${line}`);
-
-		outEmbed.data.fields.forEach((field, index) => field.value = filtered_field_lines[index].join('\n'));
+		outEmbed.data.fields.forEach(field => {
+			const split = field.value.split('\n');
+			const filtered = split.filter(line => !role_member_ids.some(id => line.includes(id)));
+			return filtered.map((line, index) => `\`${index}\`${line}`).join('\n');
+		});
 
 		if (!embeds.length) return;
 		const sot_leaving = oldMessage.guild.channels.cache.find(channel => channel.name == client.config.Mentions.channels.sot_leaving);
