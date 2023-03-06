@@ -187,7 +187,7 @@ async function updatePromptColours(leaving_ship, sot_leaving, options) {
 		const embed = message.embeds[0];
 
 		embed.data.color = parseInt(colour, 16);
-		message.edit({ embeds: [embed] });
+		message.edit({ embeds: [embed] }).catch(() => null);
 	});
 }
 
