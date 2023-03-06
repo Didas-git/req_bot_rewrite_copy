@@ -20,7 +20,7 @@ module.exports = {
 		const role_member_ids = officer_role.members.map(member => member.id);
 
 		outEmbed.data.fields = [...embeds[0].data.fields, ...embeds[1].data.fields];
-		outEmbed.data.fields.forEach(field => field.value = field.value.replace(/`\d+\W+`/gi, '').replace(/<t:\d+:R>/gi, ''));
+		outEmbed.data.fields.forEach(field => field.value = field.value.replace(/`\d+\W{0,}`/gi, '').replace(/<t:\d+:R>/gi, ''));
 
 		outEmbed.data.fields.forEach(field => {
 			const split = field.value.split('\n');
