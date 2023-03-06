@@ -169,13 +169,14 @@ async function leavingRequest(args, requester, leaving_channel, message, config)
 	redis.expire(`leaving_req:${playerLeaving.id}`, 60 * 30);
 	redis.set(`warn_window:${playerLeaving.id}`, `${Date.now() + (1000 * 60 * 10)}`, { EX: 60 * 10 });
 
-	updatePromptColours(playerLeaving.voice.channel, sot_leaving);
+	updatePromptColours(playerLeaving.voice.channel, sot_leaving, { exclude: officer_prompt });
 }
 
-async function updatePromptColours(leaving_ship, sot_leaving) {
+async function updatePromptColours(leaving_ship, sot_leaving, options) {
 	const all_prompt_messages = await sot_leaving.messages.fetch({ limit: 100 }).catch(e => console.error(e));
 
-	const prompt_messages = all_prompt_messages.filter(message => message.embeds.length > 0 && message.embeds[0].description.includes(leaving_ship.id));
+	let prompt_messages = all_prompt_messages.filter(message => message.embeds.length > 0 && message.embeds[0].description.includes(leaving_ship.id));
+	if (options?.exclude) prompt_messages = prompt_messages.filter(message => message.id != options.exclude.id);
 
 	if (!prompt_messages) return;
 
