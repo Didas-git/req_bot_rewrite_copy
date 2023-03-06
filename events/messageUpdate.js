@@ -14,7 +14,6 @@ module.exports = {
 		});
 
 		const outEmbed = new EmbedBuilder()
-			.setTitle('Queue')
 			.setColor('e7c200');
 
 		outEmbed.data.fields = [...embeds[0].data.fields, ...embeds[1].data.fields];
