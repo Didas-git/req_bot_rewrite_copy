@@ -7,7 +7,7 @@ module.exports = {
 		if (!oldMessage.channel.name.endsWith('waiting_queue')) return;
 		const messages = await oldMessage.channel.messages.fetch().then(queue_messages => queue_messages.last(2));
 		if (!messages) return;
-		const embeds = messages.reduce((acc, msg) => msg.embeds.length && acc.concat(msg.embeds[0]), []);
+		const embeds = messages.reduce((acc, msg) => msg.embeds.length && acc.concat(msg.embeds[0]), []).reverse();
 		if (!embeds.length) return;
 		const sot_leaving = oldMessage.guild.channels.cache.find(channel => channel.name == client.config.Mentions.channels.sot_leaving);
 		if (!sot_leaving) return;
