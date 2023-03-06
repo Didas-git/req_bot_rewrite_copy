@@ -17,7 +17,7 @@ module.exports = {
 			.setColor('e7c200');
 
 		outEmbed.data.fields = [...embeds[0].data.fields, ...embeds[1].data.fields];
-		outEmbed.data.fields.forEach(field => field.value = field.value.replace(/`(\d+)\W+`/gi, '`$1`').replace(/<t:\d+:R>/gi, ''));
+		outEmbed.data.fields.forEach(field => field.value = field.value.replace(/`\d+\W+`/gi, '').replace(/<t:\d+:R>/gi, ''));
 
 		const officer_role = oldMessage.guild.roles.cache.find(role => role.name == client.config.Mentions.roles.officer);
 		const role_members = officer_role.members.map(member => member.user.id);
