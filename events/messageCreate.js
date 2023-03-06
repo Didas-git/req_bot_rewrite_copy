@@ -72,6 +72,7 @@ async function dummyRequest(message, playerLeaving, leaving_channel, sot_leaving
 		);
 
 	await sot_leaving.send({ embeds: [prompt_embed], components: [officer_ack_button] });
+	updatePromptColours(playerLeaving.channel, sot_leaving);
 	return leaving_channel.send('Dummy leaving request created.').then(response => setTimeout(() => response.delete(), 5000)).then(() => message.delete());
 }
 
