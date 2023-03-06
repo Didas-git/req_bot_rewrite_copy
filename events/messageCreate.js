@@ -203,6 +203,7 @@ async function handleInteraction(interaction) {
 	if (interaction.customId == 'leaving_cancel') await handleRequest(false, interaction, sot_logs, help_desk, sot_leaving);
 	if (interaction.customId == 'leaving_clear') await clearRequest(interaction, sot_logs);
 
+	if (!request) return;
 	const ship_channel = interaction.guild.channels.cache.get(request.ship_channel);
 	updatePromptColours(ship_channel, sot_leaving);
 }
