@@ -16,7 +16,8 @@ module.exports = {
 		const outEmbed = new EmbedBuilder()
 			.setColor('e7c200');
 
-		outEmbed.data.fields = [...embeds[0].data.fields.map(field => field.value.replace(/`\d\W`/i, '')), ...embeds[1].data.fields.map(field => field.value.replace(/`\d\W`/i, ''))];
+		outEmbed.data.fields = [...embeds[0].data.fields, ...embeds[1].data.fields];
+		outEmbed.data.fields.forEach(field => field.value = field.value.replace(/`\d\W`/i, ''));
 
 		if (!embeds.length) return;
 		const sot_leaving = oldMessage.guild.channels.cache.find(channel => channel.name == client.config.Mentions.channels.sot_leaving);
