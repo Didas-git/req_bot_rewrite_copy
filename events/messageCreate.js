@@ -174,9 +174,10 @@ async function leavingRequest(args, requester, leaving_channel, message, config)
 }
 
 async function updatePromptColours(leaving_ship, sot_leaving, options) {
-	const all_prompt_messages = await sot_leaving.messages.fetch({ limit: 100 }).catch(e => console.error(e));
+	const all_prompt_messages = await sot_leaving.messages.fetch().catch(e => console.error(e));
+	const filtered_prompt_messages = all_prompt_messages.filter(message => message.id != all_prompt_messages.last().id);
 
-	const prompt_messages = all_prompt_messages.filter(message => message.embeds.length > 0 && message.embeds[0].description.includes(leaving_ship.id));
+	const prompt_messages = filtered_prompt_messages.filter(message => message.embeds.length > 0 && message.embeds[0].description && message.embeds[0].description.includes(leaving_ship.id));
 	if (options?.exclude && prompt_messages.filter(message => message.id != options.exclude.id).size == 0) return;
 
 	if (!prompt_messages) return;
