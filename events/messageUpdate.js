@@ -16,14 +16,16 @@ module.exports = {
 		const outEmbed = new EmbedBuilder()
 			.setColor('e7c200');
 
+		const officer_role = oldMessage.guild.roles.cache.find(role => role.name == client.config.Mentions.roles.officer);
+		const role_member_ids = officer_role.members.map(member => member.user.id);
+
 		outEmbed.data.fields = [...embeds[0].data.fields, ...embeds[1].data.fields];
 		outEmbed.data.fields.forEach(field => field.value = field.value.replace(/`\d+\W+`/gi, '').replace(/<t:\d+:R>/gi, ''));
 
-		const officer_role = oldMessage.guild.roles.cache.find(role => role.name == client.config.Mentions.roles.officer);
-		const role_members = officer_role.members.map(member => member.user.id);
+		const field_lines = outEmbed.data.fields.map(field => field.value.split('\n'));
+		const filtered_field_lines = field_lines.filter(line => !role_member_ids.some(id => line.includes(id))).map((line, index) => `\`${index}\`${line}`);
 
-		outEmbed.data.fields = outEmbed.data.fields.filter(field => !role_members.some(id => field.value.includes(id)));
-		outEmbed.data.fields.forEach((field, index) => field.value = `\`${index}\`${field.value}`);
+		outEmbed.data.fields.forEach((field, index) => field.value = filtered_field_lines[index].join('\n'));
 
 		if (!embeds.length) return;
 		const sot_leaving = oldMessage.guild.channels.cache.find(channel => channel.name == client.config.Mentions.channels.sot_leaving);
