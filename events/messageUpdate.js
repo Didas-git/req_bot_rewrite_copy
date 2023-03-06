@@ -23,6 +23,7 @@ module.exports = {
 		const role_members = officer_role.members.map(member => member.user.id);
 
 		outEmbed.data.fields = outEmbed.data.fields.filter(field => !role_members.some(id => field.value.includes(id)));
+		outEmbed.data.fields = outEmbed.data.fields.forEach((field, index) => field.value = `\`${index}\`${field.value}`);
 
 		if (!embeds.length) return;
 		const sot_leaving = oldMessage.guild.channels.cache.find(channel => channel.name == client.config.Mentions.channels.sot_leaving);
