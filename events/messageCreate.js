@@ -72,6 +72,7 @@ async function dummyRequest(message, playerLeaving, leaving_channel, sot_leaving
 		);
 
 	await sot_leaving.send({ embeds: [prompt_embed], components: [officer_ack_button] });
+	updatePromptColours(playerLeaving.channel, sot_leaving);
 	return leaving_channel.send('Dummy leaving request created.').then(response => setTimeout(() => response.delete(), 5000)).then(() => message.delete());
 }
 
@@ -202,6 +203,7 @@ async function handleInteraction(interaction) {
 	if (interaction.customId == 'leaving_cancel') await handleRequest(false, interaction, sot_logs, help_desk, sot_leaving);
 	if (interaction.customId == 'leaving_clear') await clearRequest(interaction, sot_logs);
 
+	if (!request) return;
 	const ship_channel = interaction.guild.channels.cache.get(request.ship_channel);
 	updatePromptColours(ship_channel, sot_leaving);
 }
