@@ -184,12 +184,12 @@ async function updatePromptColours(leaving_ship, sot_leaving, options) {
 
 	const colour = leaving_colours[(prompt_messages.size > 3) ? 3 : prompt_messages.size];
 
-	prompt_messages.forEach(message => {
+	await Promise.all(prompt_messages.map(message => {
 		const embed = message.embeds[0];
 
 		embed.data.color = parseInt(colour, 16);
-		message.edit({ embeds: [embed] }).catch(() => null);
-	});
+		return message.edit({ embeds: [embed] }).catch(() => null);
+	}));
 }
 
 async function handleInteraction(interaction) {
@@ -201,13 +201,12 @@ async function handleInteraction(interaction) {
 
 	const request = await getLeavingEntryByMessageID(interaction.message.id);
 
+	const ship_channel = request && interaction.guild.channels.cache.get(request.ship_channel);
+	if (ship_channel) await updatePromptColours(ship_channel, sot_leaving, { exclude: interaction.message });
+
 	if (interaction.customId == 'leaving_approve') await handleRequest(true, interaction, sot_logs, sot_leaving);
 	if (interaction.customId == 'leaving_cancel') await handleRequest(false, interaction, sot_logs, help_desk, sot_leaving);
 	if (interaction.customId == 'leaving_clear') await clearRequest(interaction, sot_logs);
-
-	if (!request) return;
-	const ship_channel = interaction.guild.channels.cache.get(request.ship_channel);
-	updatePromptColours(ship_channel, sot_leaving);
 }
 
 async function clearRequest(interaction, sot_logs) {
