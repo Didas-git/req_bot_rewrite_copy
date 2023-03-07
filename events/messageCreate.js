@@ -165,7 +165,7 @@ async function leavingRequest(args, requester, leaving_channel, message, config)
 
 	await redis.hSet(`leaving_req:${playerLeaving.id}`, redis_hash);
 
-	await message.delete().catch(e => e);
+	await message.delete().catch(() => null);
 
 	redis.expire(`leaving_req:${playerLeaving.id}`, 60 * 30);
 	redis.set(`warn_window:${playerLeaving.id}`, `${Date.now() + (1000 * 60 * 10)}`, { EX: 60 * 10 });
@@ -211,10 +211,10 @@ async function handleInteraction(interaction) {
 }
 
 async function clearRequest(interaction, sot_logs) {
-	interaction.message.delete().catch(e => e);
+	interaction.message.delete().catch(() => null);
 
 	const log_message_id = localLogMessages.get(interaction.message.id);
-	const log_message = await sot_logs.messages.fetch(log_message_id).catch(e => e);
+	const log_message = await sot_logs.messages.fetch(log_message_id).catch(() => null);
 
 	if (log_message) {
 		const log_embed = 'embeds' in log_message && log_message.embeds.length && log_message.embeds[0];
@@ -233,32 +233,32 @@ async function clearRequest(interaction, sot_logs) {
 async function expireRequest(member_id, prompt_id, sot_logs, sot_leaving, leaving_channel_id, user_message_id, leaving_ship) {
 	let prompt_message;
 	try {
-		prompt_message = await sot_leaving.messages.fetch(prompt_id).catch(e => e);
+		prompt_message = await sot_leaving.messages.fetch(prompt_id).catch(() => null);
 	}
 	catch (e) {
 		return;
 	}
 
 	if (!prompt_message) {
-		await sot_leaving.messages.fetch('', { force: true }).catch(e => e);
+		await sot_leaving.messages.fetch('', { force: true }).catch(() => null);
 
-		prompt_message = await sot_leaving.messages.fetch(prompt_id).catch(e => e);
+		prompt_message = await sot_leaving.messages.fetch(prompt_id).catch(() => null);
 		if (!prompt_message) return;
 	}
 
-	let leaving_channel = await sot_leaving.guild.channels.fetch(leaving_channel_id).catch(e => e);
+	let leaving_channel = await sot_leaving.guild.channels.fetch(leaving_channel_id).catch(() => null);
 	if (!leaving_channel) {
-		await sot_leaving.messages.fetch('', { force: true }).catch(e => e);
+		await sot_leaving.messages.fetch('', { force: true }).catch(() => null);
 
-		leaving_channel = await sot_leaving.guild.channels.fetch(leaving_channel_id).catch(e => e);
+		leaving_channel = await sot_leaving.guild.channels.fetch(leaving_channel_id).catch(() => null);
 		if (!leaving_channel) return;
 	}
 
-	let user_message = await leaving_channel.messages.fetch(user_message_id).catch(e => e);
+	let user_message = await leaving_channel.messages.fetch(user_message_id).catch(() => null);
 	if (!user_message) {
-		await leaving_channel.messages.fetch('', { force: true }).catch(e => e);
+		await leaving_channel.messages.fetch('', { force: true }).catch(() => null);
 
-		user_message = await leaving_channel.messages.fetch(user_message_id).catch(e => e);
+		user_message = await leaving_channel.messages.fetch(user_message_id).catch(() => null);
 		if (!user_message) return;
 	}
 
@@ -281,13 +281,13 @@ async function expireRequest(member_id, prompt_id, sot_logs, sot_leaving, leavin
 
 	const log_message_id = localLogMessages.get(prompt_id);
 	if (!log_message_id) return;
-	prompt_message.delete().catch(e => e);
+	prompt_message.delete().catch(() => null);
 
-	let log_message = await sot_logs.messages.fetch(log_message_id).catch(e => e);
+	let log_message = await sot_logs.messages.fetch(log_message_id).catch(() => null);
 	if (!log_message) {
-		await sot_logs.messages.fetch('', { force: true }).catch(e => e);
+		await sot_logs.messages.fetch('', { force: true }).catch(() => null);
 
-		log_message = await sot_logs.messages.fetch(log_message_id).catch(e => e);
+		log_message = await sot_logs.messages.fetch(log_message_id).catch(() => null);
 		if (!log_message) return;
 	}
 
@@ -305,7 +305,7 @@ async function expireRequest(member_id, prompt_id, sot_logs, sot_leaving, leavin
 }
 
 async function handleRequest(approved, interaction, sot_logs, help_desk) {
-	interaction.message.delete().catch(e => e);
+	interaction.message.delete().catch(() => null);
 	interaction.client.timeouts.get(interaction.user.id)?.forEach(timeout => clearTimeout(timeout));
 
 	await editLogMessage(interaction.message.id, (approved) ? `Approved by ${interaction.user.tag}` : `Cancelled by ${interaction.user.tag}`, sot_logs);
@@ -333,7 +333,7 @@ async function editLogMessage(messageId, message, log_channel) {
 	const request = await getLeavingEntryByMessageID(messageId);
 	if (!request) return;
 
-	const log_message = await log_channel.messages.fetch(request.logs_message).catch(e => e);
+	const log_message = await log_channel.messages.fetch(request.logs_message).catch(() => null);
 	const log_embed = log_message.embeds[0];
 
 	log_embed.data.footer.text = message;
@@ -368,9 +368,9 @@ async function notifyUser(interaction, approved, messageContent) {
 	const request = await getLeavingEntryByMessageID(interaction.message.id);
 	if (!request) return;
 
-	const request_channel = await interaction.guild.channels.fetch(request.request_channel).catch(e => e);
-	const user_message = await request_channel.messages.fetch(request.message).catch(e => e);
-	const member = await interaction.guild.members.fetch(request.user).catch(e => e);
+	const request_channel = await interaction.guild.channels.fetch(request.request_channel).catch(() => null);
+	const user_message = await request_channel.messages.fetch(request.message).catch(() => null);
+	const member = await interaction.guild.members.fetch(request.user).catch(() => null);
 
 	const approval_embed = new EmbedBuilder()
 		.setTitle('Leaving Request Approved')
