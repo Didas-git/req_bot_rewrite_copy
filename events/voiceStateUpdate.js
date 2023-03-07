@@ -91,7 +91,7 @@ function joinedShip(state) {
 }
 
 async function leftShip(state, options) {
-	const channel = state.channel && state.channel.id && await state.guild.channels.fetch(state.channel.id).catch(e => e);
+	const channel = state.channel && state.channel.id && await state.guild.channels.fetch(state.channel.id).catch(() => null);
 	if (!channel) return;
 
 	const server_number = channel.name.match(/\d+/)[0];
@@ -106,8 +106,8 @@ async function leftShip(state, options) {
 function removeChannelPermission(client, member_id, channel_id, options, state) {
 	accessTimers.set(`${channel_id}:${member_id}`, setTimeout(async () => {
 		let channel = await client.channels.fetch(channel_id).catch(async () => {
-			await client.channels.fetch().catch(e => e);
-			return await client.channels.fetch(channel_id).catch(e => e);
+			await client.channels.fetch().catch(() => null);
+			return await client.channels.fetch(channel_id).catch(() => null);
 		});
 
 		if (!channel || channel instanceof Error) channel = state.channel && state.channel;
@@ -135,7 +135,7 @@ async function checkLeavingRequest(voiceState, client) {
 	const leaving_req = await redis.exists(`leaving_req:${member.id}`);
 
 	const prompt_message_id = await redis.hGet(`leaving_req:${member.id}`, 'prompt_message');
-	const prompt_message = prompt_message_id && await sot_leaving.messages.fetch(prompt_message_id).catch(e => e);
+	const prompt_message = prompt_message_id && await sot_leaving.messages.fetch(prompt_message_id).catch(() => null);
 
 	const officer_ack_button = new ActionRowBuilder()
 		.addComponents(
@@ -170,7 +170,7 @@ async function no_leaving_request(voiceState, sot_logs) {
 async function approved_to_leave(voiceState, sot_logs) {
 	const { member, guild } = voiceState;
 	const { approved_by: approved_by_id, approved_at: approved_at_iso } = await redis.hGetAll(`approval:${member.id}`);
-	const [approved_by, approved_at] = [guild.members.fetch(approved_by_id).catch(e => e), new Date(approved_at_iso)];
+	const [approved_by, approved_at] = [guild.members.fetch(approved_by_id).catch(() => null), new Date(approved_at_iso)];
 
 	const log_embed = new EmbedBuilder()
 		.setDescription(`**${member} left ${voiceState.channel}**\nApproved by ${await approved_by} at <t:${Math.floor(approved_at / 1000)}:f>`)
