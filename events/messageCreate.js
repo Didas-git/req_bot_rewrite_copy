@@ -197,10 +197,7 @@ async function handleInteraction(interaction) {
 	const help_desk = interaction.guild.channels.cache.find(channel => channel.name.endsWith(interaction.client.config.Mentions.channels.help_desk));
 	const sot_leaving = interaction.guild.channels.cache.find(channel => channel.name == interaction.client.config.Mentions.channels.sot_leaving);
 
-	const request = await getLeavingEntryByMessageID(interaction.message.id);
-
-	const ship_channel = request && interaction.guild.channels.cache.get(request.ship_channel);
-	if (ship_channel) await updatePromptColours(interaction.message, sot_leaving, { exclude: interaction.message });
+	await updatePromptColours(interaction.message, sot_leaving, { exclude: interaction.message });
 
 	if (interaction.customId == 'leaving_approve') await handleRequest(true, interaction, sot_logs, sot_leaving);
 	if (interaction.customId == 'leaving_cancel') await handleRequest(false, interaction, sot_logs, help_desk, sot_leaving);
