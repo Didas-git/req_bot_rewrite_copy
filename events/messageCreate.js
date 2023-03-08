@@ -176,12 +176,12 @@ async function updatePromptColours(prompt_message, sot_leaving, options) {
 	const all_prompt_messages = await sot_leaving.messages.fetch().catch(e => console.error(e));
 	let filtered_prompt_messages = all_prompt_messages.filter(message => message.id != all_prompt_messages.last().id && message.embeds.length);
 	if (options?.exclude) filtered_prompt_messages = filtered_prompt_messages.filter(message => message.id != options.exclude.id);
-	const colour = leaving_colours[(filtered_prompt_messages.size > 3) ? 3 : filtered_prompt_messages.size];
 
 	const ship_mention = prompt_message.embeds[0].data.description.match(/<#\d{16,}>/g)[0];
 	const ship_prompt_messages = filtered_prompt_messages.filter(message => message.embeds[0].data.description.includes(ship_mention));
 	if (ship_prompt_messages.size == 1 && !options) return;
 
+	const colour = leaving_colours[(ship_prompt_messages.size > 3) ? 3 : ship_prompt_messages.size];
 	await Promise.all(ship_prompt_messages.map(message => {
 		const embed = message.embeds[0];
 
