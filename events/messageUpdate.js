@@ -41,9 +41,6 @@ module.exports = {
 					'value': '<:yellow_circle:1082343460100657202> **Yellow** - There is one request for this ship\n<:orange_circle:1082343460100657202> **Amber** - There is two requests for this ship\n<:red_circle:1082343460100657202> **Red** - There are 3+ requests for this ship',
 				},
 			],
-			'footer': {
-				'text': 'Dummy (officer) request colours will not update when cleared.',
-			},
 		};
 
 		if (!embeds.length) return;
