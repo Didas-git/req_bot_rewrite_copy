@@ -72,7 +72,7 @@ async function dummyRequest(message, playerLeaving, leaving_channel, sot_leaving
 		);
 
 	const prompt_message = await sot_leaving.send({ embeds: [prompt_embed], components: [officer_ack_button] });
-	updatePromptColours(prompt_message, sot_leaving);
+	updatePromptColours(prompt_message, sot_leaving, sot_leaving.client);
 	return leaving_channel.send('Dummy leaving request created.').then(response => setTimeout(() => response.delete(), 5000)).then(() => message.delete());
 }
 
@@ -169,7 +169,7 @@ async function leavingRequest(args, requester, leaving_channel, message, config)
 	redis.expire(`leaving_req:${playerLeaving.id}`, 60 * 30);
 	redis.set(`warn_window:${playerLeaving.id}`, `${Date.now() + (1000 * 60 * 10)}`, { EX: 60 * 10 });
 
-	updatePromptColours(officer_prompt, sot_leaving);
+	updatePromptColours(officer_prompt, sot_leaving, sot_leaving.client);
 }
 
 async function updatePromptColours(prompt_message, sot_leaving, client, options) {
@@ -277,7 +277,7 @@ async function expireRequest(member_id, prompt_id, sot_logs, sot_leaving, leavin
 
 	const log_message_id = localLogMessages.get(prompt_id);
 	if (!log_message_id) return;
-	updatePromptColours(prompt_message, sot_leaving);
+	updatePromptColours(prompt_message, sot_leaving, sot_leaving.client);
 	prompt_message.delete().catch(() => null);
 
 	let log_message = await sot_logs.messages.fetch(log_message_id).catch(() => null);
