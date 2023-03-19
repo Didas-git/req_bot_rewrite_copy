@@ -14,6 +14,7 @@
 
 	"Settings": {
 		"RECONNECT_MS": 5000,
+		"BUCKET_INTERVAL": 1000,
         "HEARTBEAT_URL": "http://uptimerobot.com/someheartbeat",
 		"LOG_CHANNEL": "dev_status_monitoring_test",
 		"VERBOSE": true

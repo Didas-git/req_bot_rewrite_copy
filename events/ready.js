@@ -1,6 +1,7 @@
 const { ActivityType, PresenceUpdateStatus, Events, REST, Routes } = require('discord.js');
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_BOT_TOKEN);
 const moment = require('moment');
+const Bucket = require('../modules/bucket.js');
 
 module.exports = {
 	name: Events.ClientReady,
@@ -64,6 +65,9 @@ module.exports = {
 			updateHelper.get().editReply(`Update successful, I'm on v${client.build['version']}`);
 			updateHelper.set(undefined);
 		}
+
+		// Start the bucket service
+		client.bucket = new Bucket(client);
 	},
 };
 

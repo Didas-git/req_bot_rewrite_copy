@@ -146,7 +146,7 @@ async function leavingRequest(args, requester, leaving_channel, message, config)
 	guild.client.timeouts.set(playerLeaving.id, [
 		setTimeout(() => {
 			expireRequest(playerLeaving.id, officer_prompt.id, sot_logs, sot_leaving, leaving_channel.id, user_message.id, playerLeaving.voice.channel);
-		}, 1000 * 60 * 30),
+		}, 1000),
 	]);
 
 	const redis_hash = {
