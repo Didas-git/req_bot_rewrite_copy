@@ -43,10 +43,12 @@ module.exports = {
 		if (left_help_desk && joined_a_ship && users_visited_help_desk.has(newState.member.id)) return users_visited_help_desk.delete(newState.member.id);
 
 		if (is_on_duty) return;
-		if (left_a_ship) checkLeavingRequest(oldState, client);
-		if (joined_a_ship && !left_a_ship) joinedShip(newState);
-		if (!joined_a_ship && left_a_ship) await leftShip(oldState, { RECONNECT_MS: client.config.Settings.RECONNECT_MS });
-		if (joined_a_ship && left_a_ship) await movedShip(oldState, newState);
+		client.bucket.queue(async () => {
+			if (left_a_ship) checkLeavingRequest(oldState, client);
+			if (joined_a_ship && !left_a_ship) joinedShip(newState);
+			if (!joined_a_ship && left_a_ship) await leftShip(oldState, { RECONNECT_MS: client.config.Settings.RECONNECT_MS });
+			if (joined_a_ship && left_a_ship) await movedShip(oldState, newState);
+		}, { id: newState.member.id });
 	},
 };
 
