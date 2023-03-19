@@ -48,7 +48,7 @@ module.exports = {
 			if (joined_a_ship && !left_a_ship) joinedShip(newState);
 			if (!joined_a_ship && left_a_ship) await leftShip(oldState, { RECONNECT_MS: client.config.Settings.RECONNECT_MS });
 			if (joined_a_ship && left_a_ship) await movedShip(oldState, newState);
-		}, newState.member.id);
+		}, { id: newState.member.id });
 	},
 };
 

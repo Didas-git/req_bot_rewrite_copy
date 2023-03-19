@@ -13,7 +13,7 @@ module.exports = class Bucket {
 		this.last_event_id++;
 
 		this._items.set(item.id, item);
-		this._items = new Map([...this._items.entries()].sort((a, b) => a[1].weight - b[1].weight));
+		this._items = new Map([...this._items.entries()].sort((a, b) => (a[1].weight + a[1].event_id) - (b[1].weight + b[1].event_id)));
 
 		return new Promise(res => item.resolve = res);
 	}
