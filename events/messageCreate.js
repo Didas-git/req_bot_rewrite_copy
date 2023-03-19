@@ -172,7 +172,9 @@ async function leavingRequest(args, requester, leaving_channel, message, config)
 	updatePromptColours(officer_prompt, sot_leaving);
 }
 
-async function updatePromptColours(prompt_message, sot_leaving, options) {
+async function updatePromptColours(prompt_message, sot_leaving, client, options) {
+	const bucket = client.bucket;
+
 	const all_prompt_messages = await sot_leaving.messages.fetch().catch(e => console.error(e));
 	let filtered_prompt_messages = all_prompt_messages.filter(message => message.id != all_prompt_messages.last().id && message.embeds.length);
 	if (options?.exclude) filtered_prompt_messages = filtered_prompt_messages.filter(message => message.id != options.exclude.id);
@@ -182,11 +184,11 @@ async function updatePromptColours(prompt_message, sot_leaving, options) {
 	if (ship_prompt_messages.size == 1 && !options) return;
 
 	const colour = leaving_colours[(ship_prompt_messages.size > 3) ? 3 : ship_prompt_messages.size];
-	await Promise.all(ship_prompt_messages.map(message => {
+	await Promise.all(ship_prompt_messages.map((message, index) => {
 		const embed = message.embeds[0];
 
 		embed.data.color = parseInt(colour, 16);
-		return message.edit({ embeds: [embed] }).catch(() => null);
+		return bucket.queue(async () => message.edit({ embeds: [embed] }).catch(() => null), { weight: 100 + index });
 	}));
 }
 
@@ -197,7 +199,7 @@ async function handleInteraction(interaction) {
 	const help_desk = interaction.guild.channels.cache.find(channel => channel.name.endsWith(interaction.client.config.Mentions.channels.help_desk));
 	const sot_leaving = interaction.guild.channels.cache.find(channel => channel.name == interaction.client.config.Mentions.channels.sot_leaving);
 
-	await updatePromptColours(interaction.message, sot_leaving, { exclude: interaction.message });
+	await updatePromptColours(interaction.message, sot_leaving, interaction.client, { exclude: interaction.message });
 
 	if (interaction.customId == 'leaving_approve') await handleRequest(true, interaction, sot_logs, sot_leaving);
 	if (interaction.customId == 'leaving_cancel') await handleRequest(false, interaction, sot_logs, help_desk, sot_leaving);

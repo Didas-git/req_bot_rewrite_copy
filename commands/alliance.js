@@ -36,7 +36,7 @@ module.exports = {
 			),
 		),
 
-	cooldown: 3000,
+	cooldown: 15000,
 
 	permission(interaction, client) {
 		const isOwner = client.config.OWNERS.includes(interaction.user.id);
@@ -99,14 +99,15 @@ function getAllianceCategory(interaction) {
 }
 
 async function createRole(interaction, server_number) {
+	const bucket = interaction.client.bucket;
 	const oldRole = interaction.guild.roles.cache.find(role => role.name == `SOTA-${server_number}`);
 	if (oldRole) return oldRole;
 
-	return await interaction.guild.roles.create({
+	return await bucket.queue(async () => await interaction.guild.roles.create({
 		name: `SOTA-${server_number}`,
 		reason: `Creating alliance server (${interaction.member.displayName} - ${interaction.member.id})`,
 		permissions: [],
-	});
+	}));
 }
 
 function parsePermissions(interaction, sota_role) {
@@ -131,7 +132,8 @@ function parsePermissions(interaction, sota_role) {
 }
 
 async function createServerCategory(interaction, server_number) {
-	const category = await interaction.guild.channels.create({
+	const bucket = interaction.client.bucket;
+	const category = await bucket.queue(async () => await interaction.guild.channels.create({
 		name: `━━━[ SoT Alliance ${server_number} ]━━━`,
 		type: ChannelType.GuildCategory,
 		reason: `Creating alliance server (${interaction.member.displayName} - ${interaction.member.id})`,
@@ -150,7 +152,7 @@ async function createServerCategory(interaction, server_number) {
 				deny: ['Connect', 'UseEmbeddedActivities'],
 			},
 		],
-	});
+	}));
 
 	await category.setPosition(getAllianceCategory(interaction).position + Number(server_number));
 
@@ -158,13 +160,16 @@ async function createServerCategory(interaction, server_number) {
 }
 
 async function createChannels(interaction, server_number, category, permissions) {
-	return Promise.all(interaction.client.config.SOTA_TEMPLATE.map(async channel => {
-		return await category.children.create({
-			name: channel.name.replace('${N}', server_number),
-			type: (channel.type == 'text') ? ChannelType.GuildText : ChannelType.GuildVoice,
-			permissionOverwrites: permissions[channel.permission_group],
-			reason: `Creating alliance server (${interaction.member.displayName} - ${interaction.member.id})`,
-		});
+	const bucket = interaction.client.bucket;
+	return await Promise.all(interaction.client.config.SOTA_TEMPLATE.map(async (channel, index) => {
+		return bucket.queue(async () => {
+			await category.children.create({
+				name: channel.name.replace('${N}', server_number),
+				type: (channel.type == 'text') ? ChannelType.GuildText : ChannelType.GuildVoice,
+				permissionOverwrites: permissions[channel.permission_group],
+				reason: `Creating alliance server (${interaction.member.displayName} - ${interaction.member.id})`,
+			});
+		}, { weight: 1000 + index });
 	}));
 }
 
@@ -181,11 +186,11 @@ async function createServer(interaction, client) {
 	await interaction.editReply('Create category...');
 	const category = await createServerCategory(interaction, number.toString());
 
-	await interaction.editReply('Attach status refresher...');
-	client.status_updaters.get(interaction.guild.id).add(category);
-
 	await interaction.editReply('Create channels...');
 	await createChannels(interaction, number, category, permissions);
+
+	await interaction.editReply('Attach status refresher...');
+	client.status_updaters.get(interaction.guild.id).add(category);
 
 	await interaction.editReply('Post embeds...');
 	await postEmbeds(interaction, category);
@@ -194,6 +199,8 @@ async function createServer(interaction, client) {
 }
 
 async function postEmbeds(interaction, category) {
+	const bucket = interaction.client.bucket;
+
 	const { children: channels } = category;
 	const config = interaction.client.config;
 	const chat_channel = channels.cache.find(channel => channel.name.toLowerCase().includes('_chat'));
@@ -204,12 +211,14 @@ async function postEmbeds(interaction, category) {
 	const emissary_embed = [config.Embeds.emissary];
 	const leaving_embed = [config.Embeds.leaving];
 
-	await chat_channel.send({ embeds: chat_embeds }).then(msg => msg.pin());
-	await emissary_channel.send({ embeds: emissary_embed }).then(msg => msg.pin());
-	await leaving_channel.send({ embeds: leaving_embed }).then(msg => msg.pin());
+	await bucket.queue(async () => await chat_channel.send({ embeds: chat_embeds }).then(msg => msg.pin()), { weight: 1000 });
+	await bucket.queue(async () => await emissary_channel.send({ embeds: emissary_embed }).then(msg => msg.pin()), { weight: 1000 });
+	await bucket.queue(async () => await leaving_channel.send({ embeds: leaving_embed }).then(msg => msg.pin()), { weight: 1000 });
 }
 
 async function removeServer(interaction) {
+	const bucket = interaction.client.bucket;
+
 	await interaction.editReply('Find server...');
 	const number = interaction.options.getNumber('number');
 	const delete_category = await getServer(interaction, number);
@@ -222,24 +231,25 @@ async function removeServer(interaction) {
 	if (!voice_channels_empty) return interaction.editReply('There are still members in the ship channels!');
 
 	await interaction.editReply('Delete channels...');
-	await Promise.all(delete_category.children.cache.map(child => child.delete(`Removing alliance server (${interaction.member.displayName} - ${interaction.member.id})`)));
-	await delete_category.delete(`Removing alliance server (${interaction.member.displayName} - ${interaction.member.id})`);
+	await Promise.all(delete_category.children.cache.map(child => bucket.queue(async () => await child.delete(`Removing alliance server (${interaction.member.displayName} - ${interaction.member.id})`), { weight: 1000 })));
+
+	await bucket.queue(async () => await delete_category.delete(`Removing alliance server (${interaction.member.displayName} - ${interaction.member.id})`), { weight: 1000 });
 
 	await interaction.editReply('Delete role...');
 	let delete_role = await interaction.guild.roles.cache.find(role => role.name == `SOTA-${number}`);
 	if (!delete_role) interaction.guild.roles.fetch().then(roles => delete_role = roles.cache.find(role => role.name == `SOTA-${number}`));
-	await delete_role?.delete(`Removing alliance server (${interaction.member.displayName} - ${interaction.member.id})`);
+	await bucket.queue(async () => await delete_role?.delete(`Removing alliance server (${interaction.member.displayName} - ${interaction.member.id})`), { weight: 1000 });
 
 	await interaction.editReply('Rename other servers...');
 	const rename_category = getCategories(interaction).first();
 
 	if (rename_category?.server_number > number) {
 		await rename_category.setName(`━━━[ SoT Alliance ${number} ]━━━`);
-		await Promise.all(rename_category.children.cache.map(category => category.setName(category.name.replace(`${rename_category.server_number}`, number))));
-		await rename_category.setPosition(old_position);
+		await rename_category.children.cache.map(category => bucket.queue(async () => category.setName(category.name.replace(`${rename_category.server_number}`, number)), { weight: 1000 }));
+		await bucket.queue(async () => await rename_category.setPosition(old_position), { weight: 1000 });
 		await interaction.editReply('Rename other role...');
 		const rename_role = interaction.guild.roles.cache.find(role => role.name == `SOTA-${rename_category.server_number}`);
-		await rename_role.setName(`SOTA-${number}`);
+		await bucket.queue(async () => await rename_role.setName(`SOTA-${number}`), { weight: 1000 });
 		return interaction.editReply(`Finished removing server! **\`[Server ${rename_category.server_number} is now Server ${number}]\`**`);
 	}
 
