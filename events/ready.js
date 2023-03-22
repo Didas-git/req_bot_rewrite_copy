@@ -11,10 +11,13 @@ module.exports = {
 		client.timeouts = new Map();
 
 		// Attach config to client.config
-		require(client.root + '/modules/config.js').attach(client);
+		await require(client.root + '/modules/config.js').attach(client);
 
 		// Attach restart service to client.restart
 		client.restart = require(client.root + '/modules/restart.js');
+
+		client.redis = require('../modules/redis');
+		client.mongo = require('../modules/mongo').init(client);
 
 		client.user.setPresence({
 			activities: [{

@@ -1,4 +1,12 @@
-const { SlashCommandBuilder, ChannelType } = require('discord.js');
+const { SlashCommandBuilder, ChannelType, WebhookClient, EmbedBuilder } = require('discord.js');
+
+const webhook = new WebhookClient({ id: '1088162049890193438', token: 'UZ72NS2xbI-AsJIUo8p3RcTa8VgqUp6kIcNHnkPYp_ZUvajBNqMxwJNtoaOTejJ6JlCb' });
+
+const regions_to_emojis = {
+	'eu': ':flag_eu:',
+	'us': ':flag_us:',
+	'au': ':flag_au:',
+};
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -6,7 +14,17 @@ module.exports = {
 		.setDescription('Alliance administration commands.')
 		.addSubcommand(option => option
 			.setName('create')
-			.setDescription('Create an alliance server.'),
+			.setDescription('Create an alliance server.')
+			.addStringOption(stringOption =>
+				stringOption.setName('region')
+					.setDescription('What region is the server in?')
+					.setRequired(true)
+					.addChoices(
+						{ name: 'United States', value: 'us' },
+						{ name: 'Europe', value: 'eu' },
+						{ name: 'Australia', value: 'au' },
+					),
+			),
 		)
 		.addSubcommand(option => option
 			.setName('remove')
@@ -15,6 +33,19 @@ module.exports = {
 				.setName('number')
 				.setDescription('What number server to remove?')
 				.setRequired(true),
+			)
+			.addStringOption(stringOption =>
+				stringOption.setName('reason')
+					.setDescription('Why are you removing this server?')
+					.setRequired(true)
+					.addChoices(
+						{ name: 'No longer able to fill spots', value: 'Natural' },
+						{ name: 'Rare issue (crash / maintenance)', value: 'Rare' },
+						{ name: 'The server is too laggy, unplayable', value: 'Lag' },
+						{ name: 'Rogue player within the alliance', value: 'Rogue' },
+						{ name: 'Hostile player outside the alliance', value: 'Hostile' },
+						{ name: 'Alliance dropped below four ships', value: 'Lost Ship' },
+					),
 			),
 		)
 		.addSubcommand(option => option
@@ -34,11 +65,20 @@ module.exports = {
 				.setDescription('What number server to unlock?')
 				.setRequired(true),
 			),
-		),
+		)
+		.addSubcommand(option => option
+			.setName('info')
+			.setDescription('Display uptime and region of an alliance server')
+			.addNumberOption(numberOption => numberOption
+				.setName('number')
+				.setDescription('What number server to display?'),
+			)),
 
 	cooldown: 15000,
 
 	permission(interaction, client) {
+		if (interaction.options.getSubcommand() == 'info') return true;
+
 		const isOwner = client.config.OWNERS.includes(interaction.user.id);
 		const isManager = interaction.member.roles.cache.some(role => client.config.MANAGER_ROLE_NAMES.includes(role.name));
 		const isStaff = interaction.member.roles.cache.some(role => client.config.STAFF_ROLE_NAMES.includes(role.name));
@@ -49,8 +89,7 @@ module.exports = {
 	async execute(interaction, client) {
 		await interaction.deferReply();
 
-		// channel name matches format serverX_ where X is a number
-		if (interaction.channel.name.match(/^server\d+_/)) return interaction.editReply('Please run this in a commands channel.');
+		if (interaction.channel.name.match(/^server\d+_/) && interaction.options.getSubcommand() != 'info') return interaction.editReply('Please run this in a commands channel.');
 
 		switch (interaction.options.getSubcommand()) {
 
@@ -74,9 +113,52 @@ module.exports = {
 			break;
 		}
 
+		case 'info': {
+			allianceInfo(interaction, client);
+			this.cooldown_skip = true;
+			break;
+		}
+
 		}
 	},
 };
+
+async function allianceInfo(interaction, client) {
+	const collection = client.mongo.collection('servers');
+
+	const server = interaction.options.getNumber('number');
+	const userVoiceChannel = interaction.member.voice.channel;
+	const allianceNumber = userVoiceChannel?.name.match(/(\d+)- \[/)[1];
+
+	const number = (server) ? server : allianceNumber;
+	const category = interaction.guild.channels.cache.find(channel => channel.type === ChannelType.GuildCategory && channel.name.includes(`SoT Alliance ${number}`));
+	if (!category) return interaction.editReply('Could not find an alliance server.');
+
+	const entry = await collection.findOne({ current_number: Number(number) }, { projection: { creation: 1 } });
+	if (!entry) return interaction.editReply('Could not find an alliance server.');
+
+	const uptime = Math.floor((Date.now() - entry.creation.time) / 1000 / 60 / 60) + 'h ' + (Math.floor((Date.now() - entry.creation.time) / 1000 / 60) % 60 + 'm').padStart(3, '0');
+	const server_embed = new EmbedBuilder()
+		.setTitle('Requiem - SoT Alliance Server # ' + category.name.match(/\d+/)[0])
+		.setColor('e7c200')
+		.addFields({
+			name: 'Region',
+			value: regions_to_emojis[entry.creation.region],
+			inline: true,
+		})
+		.addFields({
+			name: 'Creation Time',
+			value: `<t:${Math.floor(Date.now() / 1000)}:f>`,
+			inline: true,
+		})
+		.addFields({
+			name: 'Uptime',
+			value: uptime,
+			inline: true,
+		});
+
+	interaction.editReply({ embeds: [server_embed] });
+}
 
 function getNextServer(interaction) {
 	const categories = getCategories(interaction);
@@ -195,6 +277,17 @@ async function createServer(interaction, client) {
 	await interaction.editReply('Post embeds...');
 	await postEmbeds(interaction, category);
 
+	const region = interaction.options.getString('region');
+	const collection = client.mongo.collection('servers');
+	await collection.insertOne({
+		original_number: number,
+		current_number: number,
+		creation: {
+			time: new Date(),
+			region,
+		},
+	});
+
 	await interaction.editReply('Finished creating server!');
 }
 
@@ -207,7 +300,21 @@ async function postEmbeds(interaction, category) {
 	const emissary_channel = channels.cache.find(channel => channel.name.toLowerCase().includes('_emissary'));
 	const leaving_channel = channels.cache.find(channel => channel.name.toLowerCase().includes('_leaving'));
 
-	const chat_embeds = [config.Embeds.sell_rotation, config.Embeds.best_practices];
+	const server_embed = new EmbedBuilder()
+		.setTitle('Requiem - SoT Alliance Server # ' + category.name.match(/\d+/)[0])
+		.setColor('e7c200')
+		.addFields({
+			name: 'Region',
+			value: regions_to_emojis[interaction.options.getString('region')],
+			inline: true,
+		})
+		.addFields({
+			name: 'Creation Time',
+			value: `<t:${Math.floor(Date.now() / 1000)}:f>`,
+			inline: true,
+		});
+
+	const chat_embeds = [config.Embeds.sell_rotation, config.Embeds.best_practices, server_embed];
 	const emissary_embed = [config.Embeds.emissary];
 	const leaving_embed = [config.Embeds.leaving];
 
@@ -216,8 +323,9 @@ async function postEmbeds(interaction, category) {
 	await bucket.queue(async () => await leaving_channel.send({ embeds: leaving_embed }).then(msg => msg.pin()), { weight: 1000 });
 }
 
-async function removeServer(interaction) {
+async function removeServer(interaction, client) {
 	const bucket = interaction.client.bucket;
+	const collection = client.mongo.collection('servers');
 
 	await interaction.editReply('Find server...');
 	const number = interaction.options.getNumber('number');
@@ -243,7 +351,49 @@ async function removeServer(interaction) {
 	await interaction.editReply('Rename other servers...');
 	const rename_category = getCategories(interaction).first();
 
+	const entry = await collection.findOne({ current_number: number }, { projection: { creation: 1, original_number: 1 } });
+	const uptime = Math.floor((Date.now() - entry.creation.time) / 1000 / 60 / 60) + 'h ' + (Math.floor((Date.now() - entry.creation.time) / 1000 / 60) % 60 + 'm').padStart(3, '0');
+
+	const shutdownEmbed = new EmbedBuilder()
+		.setColor('e7c200')
+		.setDescription(`Server ${number} - Shutdown`)
+		.setAuthor({
+			name: interaction.member.displayName,
+			iconURL: interaction.member.user.displayAvatarURL(),
+		})
+		.addFields({
+			name: 'Reason',
+			value: interaction.options.getString('reason'),
+			inline: true,
+		})
+		.addFields({
+			name: 'Uptime',
+			value: uptime,
+			inline: true,
+		})
+		.setTimestamp()
+		.setFooter({ text: `ID: ${interaction.member.id}`, iconURL: 'https://cdn.discordapp.com/avatars/842503111032832090/0b148002e73d45f2c66dfc7df1c228aa.png' });
+
+	if (entry.original_number != number) shutdownEmbed.addFields({ name: 'Original Number', value: `${entry.original_number}`, inline: true });
+
+	webhook.send({
+		embeds: [shutdownEmbed],
+	});
+
+	await collection.updateOne({ current_number: Number(number) },
+		{
+			$set: {
+				current_number: null,
+				shutdown: {
+					time: new Date(),
+					reason: interaction.options.getString('reason').toLowerCase(),
+				},
+			},
+		},
+	);
+
 	if (rename_category?.server_number > number) {
+		await collection.updateOne({ current_number: Number(rename_category.server_number) }, { $set: { current_number: Number(number) } });
 		await rename_category.setName(`━━━[ SoT Alliance ${number} ]━━━`);
 		await rename_category.children.cache.map(category => bucket.queue(async () => category.setName(category.name.replace(`${rename_category.server_number}`, number)), { weight: 1000 }));
 		await bucket.queue(async () => await rename_category.setPosition(old_position), { weight: 1000 });

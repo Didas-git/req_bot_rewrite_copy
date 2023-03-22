@@ -1,7 +1,7 @@
 const { Events, ChannelType, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Collection } = require('discord.js');
-const redis = require('../modules/redis');
 
 let listener_attached;
+let redis;
 const localLogMessages = new Map();
 
 const leaving_colours = {
@@ -14,6 +14,7 @@ module.exports = {
 	name: Events.MessageCreate,
 	once: false,
 	async execute(message, client) {
+		redis = client.redis;
 		const { channel, author: member } = message;
 		const { config } = client;
 
