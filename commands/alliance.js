@@ -387,6 +387,7 @@ async function removeServer(interaction, client) {
 				shutdown: {
 					time: new Date(),
 					reason: interaction.options.getString('reason').toLowerCase(),
+					officer: interaction.member.id,
 				},
 			},
 		},
