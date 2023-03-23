@@ -285,6 +285,7 @@ async function createServer(interaction, client) {
 		creation: {
 			time: new Date(),
 			region,
+			officer: interaction.member.id,
 		},
 	});
 
