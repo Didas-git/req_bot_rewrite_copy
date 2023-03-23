@@ -168,7 +168,7 @@ async function allianceInfo(interaction, client) {
 		})
 		.addFields({
 			name: 'Creation Time',
-			value: `<t:${Math.floor(Date.now() / 1000)}:f>`,
+			value: `<t:${Math.floor(new Date(entry.creation.time) / 1000)}:f>`,
 			inline: true,
 		})
 		.addFields({
