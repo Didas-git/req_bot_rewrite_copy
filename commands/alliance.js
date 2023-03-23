@@ -147,7 +147,8 @@ async function allianceInfo(interaction, client) {
 
 	const server = interaction.options.getNumber('number');
 	const userVoiceChannel = interaction.member.voice.channel;
-	const allianceNumber = userVoiceChannel?.name.match(/(\d+)- \[/)[1];
+	let allianceNumber = userVoiceChannel?.name.match(/(\d+)- \[/);
+	if (allianceNumber) allianceNumber = allianceNumber[1];
 
 	const number = (server) ? server : allianceNumber;
 	const category = interaction.guild.channels.cache.find(channel => channel.type === ChannelType.GuildCategory && channel.name.includes(`SoT Alliance ${number}`));
