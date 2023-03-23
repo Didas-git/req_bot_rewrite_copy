@@ -77,13 +77,26 @@ module.exports = {
 	cooldown: 15000,
 
 	permission(interaction, client) {
-		if (interaction.options.getSubcommand() == 'info') return true;
-
 		const isOwner = client.config.OWNERS.includes(interaction.user.id);
 		const isManager = interaction.member.roles.cache.some(role => client.config.MANAGER_ROLE_NAMES.includes(role.name));
+		const isSupervisor = interaction.member.roles.cache.some(role => client.config.SUPERVISOR_ROLE_NAMES.includes(role.name));
 		const isStaff = interaction.member.roles.cache.some(role => client.config.STAFF_ROLE_NAMES.includes(role.name));
 
-		return isOwner || isManager || isStaff;
+		switch (interaction.options.getSubcommand()) {
+
+		case 'info': {
+			return true;
+		}
+
+		case ('create' || 'remove'): {
+			return (isOwner || isManager || isSupervisor || isStaff);
+		}
+
+		default: {
+			return (isOwner || isManager || isSupervisor);
+		}
+
+		}
 	},
 
 	async execute(interaction, client) {
