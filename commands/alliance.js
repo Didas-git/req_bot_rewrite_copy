@@ -438,8 +438,21 @@ async function removeServer(interaction, client) {
 			await rename_category.children.cache.map(category => bucket.queue(async () => category.setName(category.name.replace(`${rename_category.server_number}`, number)), { weight: 1000 }));
 			await bucket.queue(async () => await rename_category.setPosition(old_position), { weight: 1000 });
 			await modalInteraction.editReply('Rename other role...');
-			const rename_role = interaction.guild.roles.cache.find(role => role.name == `SOTA-${rename_category.server_number}`);
-			await bucket.queue(async () => await rename_role.setName(`SOTA-${number}`), { weight: 1000 });
+			let rename_role = interaction.guild.roles.cache.find(role => role.name == `SOTA-${rename_category.server_number}`);
+
+			if (!rename_role) {
+				const roles = await interaction.guild.roles.fetch();
+				rename_role = roles.cache.find(role => role.name == `SOTA-${rename_category.server_number}`);
+			}
+
+			if (!rename_role) {
+				rename_role = await bucket.queue(async () => await interaction.guild.roles.create({
+					name: `SOTA-${rename_category.server_number}`,
+					reason: `Renaming alliance server (${interaction.member.displayName} - ${interaction.member.id})`,
+					permissions: [],
+				}));
+			}
+			if (rename_role) await bucket.queue(async () => await bucket.queue(async () => await rename_role.setName(`SOTA-${number}`), { weight: 1000 }));
 			return modalInteraction.editReply(`Finished removing server! **\`[Server ${rename_category.server_number} is now Server ${number}]\`**`);
 		}
 
