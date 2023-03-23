@@ -84,16 +84,16 @@ module.exports = {
 
 		switch (interaction.options.getSubcommand()) {
 
-		case 'info': {
-			return true;
-		}
-
 		case ('create' || 'remove'): {
 			return (isOwner || isManager || isSupervisor || isStaff);
 		}
 
-		default: {
+		case ('lock' || 'unlock'): {
 			return (isOwner || isManager || isSupervisor);
+		}
+
+		default: {
+			return true;
 		}
 
 		}
