@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, ChannelType, WebhookClient, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, ChannelType, WebhookClient, EmbedBuilder, TextInputBuilder, TextInputStyle, ModalBuilder, ActionRowBuilder } = require('discord.js');
 
 const webhook = new WebhookClient({ id: '1088162049890193438', token: 'UZ72NS2xbI-AsJIUo8p3RcTa8VgqUp6kIcNHnkPYp_ZUvajBNqMxwJNtoaOTejJ6JlCb' });
 
@@ -87,8 +87,6 @@ module.exports = {
 	},
 
 	async execute(interaction, client) {
-		await interaction.deferReply();
-
 		if (interaction.channel.name.match(/^server\d+_/) && interaction.options.getSubcommand() != 'info') return interaction.editReply('Please run this in a commands channel.');
 
 		switch (interaction.options.getSubcommand()) {
@@ -132,10 +130,10 @@ async function allianceInfo(interaction, client) {
 
 	const number = (server) ? server : allianceNumber;
 	const category = interaction.guild.channels.cache.find(channel => channel.type === ChannelType.GuildCategory && channel.name.includes(`SoT Alliance ${number}`));
-	if (!category) return interaction.editReply('Could not find an alliance server.');
+	if (!category) return interaction.reply('Could not find an alliance server.');
 
 	const entry = await collection.findOne({ current_number: Number(number) }, { projection: { creation: 1 } });
-	if (!entry) return interaction.editReply('Could not find an alliance server.');
+	if (!entry) return interaction.reply('Could not find an alliance server.');
 
 	const uptime = Math.floor((Date.now() - entry.creation.time) / 1000 / 60 / 60) + 'h ' + (Math.floor((Date.now() - entry.creation.time) / 1000 / 60) % 60 + 'm').padStart(3, '0');
 	const server_embed = new EmbedBuilder()
@@ -157,7 +155,7 @@ async function allianceInfo(interaction, client) {
 			inline: true,
 		});
 
-	interaction.editReply({ embeds: [server_embed] });
+	interaction.reply({ embeds: [server_embed] });
 }
 
 function getNextServer(interaction) {
@@ -256,7 +254,7 @@ async function createChannels(interaction, server_number, category, permissions)
 }
 
 async function createServer(interaction, client) {
-	await interaction.editReply('Determine server number...');
+	await interaction.reply('Determine server number...');
 	const number = getNextServer(interaction);
 
 	await interaction.editReply('Create role...');
@@ -325,87 +323,106 @@ async function postEmbeds(interaction, category) {
 }
 
 async function removeServer(interaction, client) {
-	const bucket = interaction.client.bucket;
-	const collection = client.mongo.collection('servers');
+	const detailsModal = new ModalBuilder()
+		.setTitle('Shutdown Details')
+		.setCustomId('shutdownDetails');
 
-	await interaction.editReply('Find server...');
-	const number = interaction.options.getNumber('number');
-	const delete_category = await getServer(interaction, number);
-	if (!delete_category) return interaction.editReply(`Server \`${number}\` does not exist!`);
-	const old_position = delete_category.position;
+	const detailsText = new TextInputBuilder()
+		.setCustomId('shutdownText')
+		.setLabel('Details')
+		.setPlaceholder('Why are you shutting down this server?')
+		.setStyle(TextInputStyle.Paragraph)
+		.setRequired(false);
 
-	await interaction.editReply('Check if voice channels empty...');
-	const voice_channels = delete_category.children.cache.filter(channel => channel.type == ChannelType.GuildVoice);
-	const voice_channels_empty = voice_channels.every(channel => channel.members.size == 0);
-	if (!voice_channels_empty) return interaction.editReply('There are still members in the ship channels!');
+	const actionRow = new ActionRowBuilder()
+		.addComponents(detailsText);
 
-	await interaction.editReply('Delete channels...');
-	await Promise.all(delete_category.children.cache.map(child => bucket.queue(async () => await child.delete(`Removing alliance server (${interaction.member.displayName} - ${interaction.member.id})`), { weight: 1000 })));
+	detailsModal.addComponents(actionRow);
 
-	await bucket.queue(async () => await delete_category.delete(`Removing alliance server (${interaction.member.displayName} - ${interaction.member.id})`), { weight: 1000 });
+	await interaction.showModal(detailsModal);
+	const filter = (modalInteraction) => modalInteraction.customId === 'shutdownDetails';
+	interaction.awaitModalSubmit({ filter, time: 15_000 }).then(async modalInteraction => {
+		const shutdownDetails = modalInteraction.fields.getTextInputValue('shutdownText');
+		const bucket = interaction.client.bucket;
+		const collection = client.mongo.collection('servers');
 
-	await interaction.editReply('Delete role...');
-	let delete_role = await interaction.guild.roles.cache.find(role => role.name == `SOTA-${number}`);
-	if (!delete_role) interaction.guild.roles.fetch().then(roles => delete_role = roles.cache.find(role => role.name == `SOTA-${number}`));
-	await bucket.queue(async () => await delete_role?.delete(`Removing alliance server (${interaction.member.displayName} - ${interaction.member.id})`), { weight: 1000 });
+		await modalInteraction.reply('Find server...');
+		const number = interaction.options.getNumber('number');
+		const delete_category = await getServer(interaction, number);
+		if (!delete_category) return modalInteraction.editReply(`Server \`${number}\` does not exist!`);
+		const old_position = delete_category.position;
 
-	await interaction.editReply('Rename other servers...');
-	const rename_category = getCategories(interaction).first();
+		await modalInteraction.editReply('Check if voice channels empty...');
+		const voice_channels = delete_category.children.cache.filter(channel => channel.type == ChannelType.GuildVoice);
+		const voice_channels_empty = voice_channels.every(channel => channel.members.size == 0);
+		if (!voice_channels_empty) return modalInteraction.editReply('There are still members in the ship channels!');
 
-	const entry = await collection.findOne({ current_number: number }, { projection: { creation: 1, original_number: 1 } });
-	const uptime = Math.floor((Date.now() - entry.creation.time) / 1000 / 60 / 60) + 'h ' + (Math.floor((Date.now() - entry.creation.time) / 1000 / 60) % 60 + 'm').padStart(3, '0');
+		await modalInteraction.editReply('Delete channels...');
+		await Promise.all(delete_category.children.cache.map(child => bucket.queue(async () => await child.delete(`Removing alliance server (${interaction.member.displayName} - ${interaction.member.id})`), { weight: 1000 })));
 
-	const shutdownEmbed = new EmbedBuilder()
-		.setColor('e7c200')
-		.setDescription(`Server ${number} - Shutdown`)
-		.setAuthor({
-			name: interaction.member.displayName,
-			iconURL: interaction.member.user.displayAvatarURL(),
-		})
-		.addFields({
-			name: 'Reason',
-			value: interaction.options.getString('reason'),
-			inline: true,
-		})
-		.addFields({
-			name: 'Uptime',
-			value: uptime,
-			inline: true,
-		})
-		.setTimestamp()
-		.setFooter({ text: `ID: ${interaction.member.id}`, iconURL: 'https://cdn.discordapp.com/avatars/842503111032832090/0b148002e73d45f2c66dfc7df1c228aa.png' });
+		await bucket.queue(async () => await delete_category.delete(`Removing alliance server (${interaction.member.displayName} - ${interaction.member.id})`), { weight: 1000 });
 
-	if (entry.original_number != number) shutdownEmbed.addFields({ name: 'Original Number', value: `${entry.original_number}`, inline: true });
+		await modalInteraction.editReply('Delete role...');
+		let delete_role = await interaction.guild.roles.cache.find(role => role.name == `SOTA-${number}`);
+		if (!delete_role) interaction.guild.roles.fetch().then(roles => delete_role = roles.cache.find(role => role.name == `SOTA-${number}`));
+		await bucket.queue(async () => await delete_role?.delete(`Removing alliance server (${interaction.member.displayName} - ${interaction.member.id})`), { weight: 1000 });
 
-	webhook.send({
-		embeds: [shutdownEmbed],
-	});
+		await modalInteraction.editReply('Rename other servers...');
+		const rename_category = getCategories(interaction).first();
 
-	await collection.updateOne({ current_number: Number(number) },
-		{
-			$set: {
-				current_number: null,
-				shutdown: {
-					time: new Date(),
-					reason: interaction.options.getString('reason').toLowerCase(),
-					officer: interaction.member.id,
+		const entry = await collection.findOne({ current_number: number }, { projection: { creation: 1, original_number: 1 } });
+		const uptime = Math.floor((Date.now() - entry.creation.time) / 1000 / 60 / 60) + 'h ' + (Math.floor((Date.now() - entry.creation.time) / 1000 / 60) % 60 + 'm').padStart(3, '0');
+
+		const { _id } = await collection.findOne({ current_number: Number(number) }, { projection: { _id: 1 } });
+		await collection.updateOne({ current_number: Number(number) },
+			{
+				$set: {
+					current_number: null,
+					shutdown: {
+						time: new Date(),
+						reason: interaction.options.getString('reason').toLowerCase(),
+						officer: interaction.member.id,
+						details: shutdownDetails,
+					},
 				},
 			},
-		},
-	);
+		);
 
-	if (rename_category?.server_number > number) {
-		await collection.updateOne({ current_number: Number(rename_category.server_number) }, { $set: { current_number: Number(number) } });
-		await rename_category.setName(`━━━[ SoT Alliance ${number} ]━━━`);
-		await rename_category.children.cache.map(category => bucket.queue(async () => category.setName(category.name.replace(`${rename_category.server_number}`, number)), { weight: 1000 }));
-		await bucket.queue(async () => await rename_category.setPosition(old_position), { weight: 1000 });
-		await interaction.editReply('Rename other role...');
-		const rename_role = interaction.guild.roles.cache.find(role => role.name == `SOTA-${rename_category.server_number}`);
-		await bucket.queue(async () => await rename_role.setName(`SOTA-${number}`), { weight: 1000 });
-		return interaction.editReply(`Finished removing server! **\`[Server ${rename_category.server_number} is now Server ${number}]\`**`);
-	}
+		const shutdownEmbed = new EmbedBuilder()
+			.setColor('e7c200')
+			.setTitle(`Server ${number} - Shutdown`)
+			.addFields({
+				name: 'Reason',
+				value: interaction.options.getString('reason'),
+				inline: true,
+			})
+			.addFields({
+				name: 'Uptime',
+				value: uptime,
+				inline: true,
+			})
+			.setTimestamp()
+			.setFooter({ text: `ID: ${_id}`, iconURL: 'https://cdn.discordapp.com/avatars/842503111032832090/0b148002e73d45f2c66dfc7df1c228aa.png' });
 
-	await interaction.editReply('Finished removing server!');
+		if (entry.original_number != number) shutdownEmbed.addFields({ name: 'Original Number', value: `${entry.original_number}`, inline: true });
+
+		webhook.send({
+			embeds: [shutdownEmbed],
+		});
+
+		if (rename_category?.server_number > number) {
+			await collection.updateOne({ current_number: Number(rename_category.server_number) }, { $set: { current_number: Number(number) } });
+			await rename_category.setName(`━━━[ SoT Alliance ${number} ]━━━`);
+			await rename_category.children.cache.map(category => bucket.queue(async () => category.setName(category.name.replace(`${rename_category.server_number}`, number)), { weight: 1000 }));
+			await bucket.queue(async () => await rename_category.setPosition(old_position), { weight: 1000 });
+			await modalInteraction.editReply('Rename other role...');
+			const rename_role = interaction.guild.roles.cache.find(role => role.name == `SOTA-${rename_category.server_number}`);
+			await bucket.queue(async () => await rename_role.setName(`SOTA-${number}`), { weight: 1000 });
+			return modalInteraction.editReply(`Finished removing server! **\`[Server ${rename_category.server_number} is now Server ${number}]\`**`);
+		}
+
+		await modalInteraction.editReply('Finished removing server!');
+	}).catch(() => new Error('time'));
 }
 
 function getCategories(interaction) {
@@ -429,7 +446,7 @@ async function getActiveShipChannels(category) {
 }
 
 async function lockServer(interaction) {
-	await interaction.editReply('Find server...');
+	await interaction.reply('Find server...');
 	const number = interaction.options.getNumber('number');
 	const lock_category = await getServer(interaction, number);
 	if (!lock_category) return interaction.editReply(`Server \`${number}\` does not exist!`);
@@ -447,7 +464,7 @@ async function lockServer(interaction) {
 }
 
 async function unlockServer(interaction) {
-	await interaction.editReply('Find server...');
+	await interaction.reply('Find server...');
 	const number = interaction.options.getNumber('number');
 
 	const unlock_category = await getServer(interaction, number);
