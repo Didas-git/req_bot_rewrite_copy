@@ -19,6 +19,11 @@ const executeCommand = async (client, interaction) => {
 			return interaction.reply('No Permission!');
 		}
 
+		if (command.cooldown_skip) {
+			cooldowns.delete(command.data.name);
+			delete command.cooldown_skip;
+		}
+
 		if (cooldowns.has(command.data.name)) return interaction.reply('Woah, slow down there, you\'re going too fast!');
 
 		if (client.config.Settings.VERBOSE) {

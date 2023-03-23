@@ -10,6 +10,7 @@
     "discord.js": "^14.7.1",
     "dotenv": "^16.0.3",
     "moment": "^2.29.4",
+    "mongodb": "^5.1.0",
     "redis": "^4.6.5",
     "shelljs": "^0.8.5"
   },
