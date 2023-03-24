@@ -13,8 +13,16 @@ class StatusUpdater {
 		const categories = this.getCategories(guild);
 		this.intervals = new Map();
 
+		this.start(categories);
+	}
+
+	async start(categories) {
+		await new Promise(res => {
+			this.client.on('dbConnected', () => res());
+		});
+
 		this.update = (async () => {
-			categories.forEach(category => this.updateStatus(category));
+			categories.forEach(category => this.updateStatus(category, this.client));
 		})();
 
 		categories.forEach(category => this.intervals.set(category.server_number, setInterval(() => this.updateStatus(category), 600000)));
@@ -49,6 +57,7 @@ class StatusUpdater {
 
 		const active_ships = await this.getActiveShipChannels(category);
 		const status_indicator = await this.getStatusIndicator(category);
+
 		if (!status_indicator) return;
 		const new_name = (active_ships.filter(channel => !channel.name.match(/\Whid(e|den)\W/i)).size > 0) ? `🟢 SERVER ${category.server_number} [${active_ships.filter(channel => !channel.name.match(/\Whid(e|den)\W/i)).size} SHIPS]` : `🔴 SERVER ${category.server_number}`;
 		if (status_indicator.name == new_name) return;

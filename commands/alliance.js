@@ -351,8 +351,8 @@ async function removeServer(interaction, client) {
 
 	const detailsText = new TextInputBuilder()
 		.setCustomId('shutdownText')
-		.setLabel('Details')
-		.setPlaceholder('Why are you shutting down this server?')
+		.setLabel('Additional Details')
+		.setPlaceholder('Please provide additional details, if any. (eg. server became to laggy, multiple loot inspections carried out - officers involved in shutdown: Bill, Joe)')
 		.setStyle(TextInputStyle.Paragraph)
 		.setRequired(false);
 
