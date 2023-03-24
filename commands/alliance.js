@@ -452,7 +452,7 @@ async function removeServer(interaction, client) {
 					permissions: [],
 				}));
 			}
-			if (rename_role) await bucket.queue(async () => await bucket.queue(async () => await rename_role.setName(`SOTA-${number}`), { weight: 1000 }));
+			if (rename_role) await bucket.queue(async () => await rename_role.setName(`SOTA-${number}`), { weight: 1000 });
 			return modalInteraction.editReply(`Finished removing server! **\`[Server ${rename_category.server_number} is now Server ${number}]\`**`);
 		}
 
