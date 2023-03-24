@@ -13,8 +13,16 @@ class StatusUpdater {
 		const categories = this.getCategories(guild);
 		this.intervals = new Map();
 
+		this.start(categories);
+	}
+
+	async start(categories) {
+		await new Promise(res => {
+			this.client.on('dbConnected', () => res());
+		});
+
 		this.update = (async () => {
-			categories.forEach(category => this.updateStatus(category));
+			categories.forEach(category => this.updateStatus(category, this.client));
 		})();
 
 		categories.forEach(category => this.intervals.set(category.server_number, setInterval(() => this.updateStatus(category), 600000)));
@@ -44,11 +52,25 @@ class StatusUpdater {
 		return category.children.cache.find(channel => channel.name.toLowerCase().includes(`server ${category.server_number}`) && !channel.name.startsWith(`${category.server_number}-`));
 	}
 
-	async updateStatus(category) {
+	async updateStatus(category, client) {
 		if (!category.guild.channels.cache.has(category.id)) return clearInterval(this.intervals.get(category.server_number));
 
 		const active_ships = await this.getActiveShipChannels(category);
 		const status_indicator = await this.getStatusIndicator(category);
+
+		const formatted_ships = active_ships.map(channel => ({
+			channel_id: channel.id,
+			activity: channel.name.match(/(\[.*\] ?\W+)((\W?\w+)+)/i)[2] ?? '',
+			ship_type: channel.name.match(/-(\w{1,3})]/i)?.length > 1 ? channel.name.match(/-(\w{1,3})]/i)[1].replace('C', '') : null,
+			emissary: (channel.name.match(/\[(.+)-/i)) ? channel.name.match(/\[(.+)-/i)[1].toUpperCase() : 'unknown',
+			captained: channel.name.match(/-(C\w)]/i) ? true : false,
+			player_count: channel.members.filter(member => !member.roles.cache.some(role => client.config.STAFF_ROLE_NAMES.includes(role.name))).size ?? 0,
+		}));
+
+		const collection = client.mongo.collection('servers');
+
+		collection.updateOne({ current_number: category.server_number }, { $set: { ships: formatted_ships } }, { upsert: true });
+
 		if (!status_indicator) return;
 		const new_name = (active_ships.filter(channel => !channel.name.match(/\Whid(e|den)\W/i)).size > 0) ? `🟢 SERVER ${category.server_number} [${active_ships.filter(channel => !channel.name.match(/\Whid(e|den)\W/i)).size} SHIPS]` : `🔴 SERVER ${category.server_number}`;
 		if (status_indicator.name == new_name) return;
