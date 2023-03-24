@@ -395,7 +395,7 @@ async function removeServer(interaction, client) {
 		const entry = await collection.findOne({ current_number: number }, { projection: { creation: 1, original_number: 1 } });
 		const uptime = Math.floor((Date.now() - entry.creation.time) / 1000 / 60 / 60) + 'h ' + (Math.floor((Date.now() - entry.creation.time) / 1000 / 60) % 60 + 'm').padStart(3, '0');
 
-		const { _id } = await collection.findOne({ current_number: Number(number) }, { projection: { _id: 1 } });
+		const { _id, ships } = await collection.findOne({ current_number: Number(number) }, { projection: { _id: 1, ships: 1 } });
 		await collection.updateOne({ current_number: Number(number) },
 			{
 				$set: {
@@ -417,6 +417,11 @@ async function removeServer(interaction, client) {
 				name: 'Reason',
 				value: interaction.options.getString('reason'),
 				inline: true,
+			})
+			.addFields({
+				name: 'Ships',
+				value: ships.length,
+				inine: true,
 			})
 			.addFields({
 				name: 'Uptime',
