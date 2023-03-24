@@ -363,7 +363,7 @@ async function removeServer(interaction, client) {
 
 	await interaction.showModal(detailsModal);
 	const filter = (modalInteraction) => modalInteraction.customId === 'shutdownDetails';
-	interaction.awaitModalSubmit({ filter, time: 15_000 }).then(async modalInteraction => {
+	interaction.awaitModalSubmit({ filter, time: 300_000 }).then(async modalInteraction => {
 		const shutdownDetails = modalInteraction.fields.getTextInputValue('shutdownText');
 		const bucket = interaction.client.bucket;
 		const collection = client.mongo.collection('servers');
