@@ -20,7 +20,7 @@ async function dbConnect(client) {
 	try {
 		console.log('Connecting to database');
 		await dbClient.connect();
-		const dbDatabase = dbClient.db('req-bot-v2');
+		const dbDatabase = dbClient.db('req-bot-v2-dev');
 		dbDatabase.client = dbClient;
 		console.log('Connected to database');
 		return dbDatabase;
