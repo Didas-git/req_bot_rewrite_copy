@@ -307,6 +307,7 @@ async function createServer(interaction, client) {
 			region,
 			officer: interaction.member.id,
 		},
+		ships: [],
 	});
 
 	await interaction.editReply('Finished creating server!');
@@ -392,11 +393,11 @@ async function removeServer(interaction, client) {
 		await modalInteraction.editReply('Rename other servers...');
 		const rename_category = getCategories(interaction).first();
 
-		const entry = await collection.findOne({ current_number: number }, { projection: { creation: 1, original_number: 1 } });
+		const entry = await collection.findOne({ current_number: number }, { projection: { creation: 1, original_number: 1, ships: 1 } });
 		const uptime = Math.floor((Date.now() - entry.creation.time) / 1000 / 60 / 60) + 'h ' + (Math.floor((Date.now() - entry.creation.time) / 1000 / 60) % 60 + 'm').padStart(3, '0');
 
-		const { _id, ships } = await collection.findOne({ current_number: Number(number) }, { projection: { _id: 1, ships: 1 } });
-		await collection.updateOne({ current_number: Number(number) },
+		const { _id, ships, creation } = entry;
+		collection.updateOne({ current_number: Number(number) },
 			{
 				$set: {
 					current_number: null,
@@ -417,21 +418,37 @@ async function removeServer(interaction, client) {
 				name: 'Reason',
 				value: interaction.options.getString('reason'),
 				inline: true,
-			})
-			.addFields({
+			},
+			{
 				name: 'Ships',
-				value: ships.length,
-				inine: true,
-			})
-			.addFields({
+				value: ships.length.toString(),
+				inline: true,
+			},
+			{
 				name: 'Uptime',
 				value: uptime,
+				inline: true,
+			},
+			{
+				name: 'Officer',
+				value: `<@${interaction.member.id}>`,
+				inline: true,
+			},
+			{
+				name: 'Region',
+				value: regions_to_emojis[creation.region],
 				inline: true,
 			})
 			.setTimestamp()
 			.setFooter({ text: `ID: ${_id}`, iconURL: 'https://cdn.discordapp.com/avatars/842503111032832090/0b148002e73d45f2c66dfc7df1c228aa.png' });
 
-		if (entry.original_number != number) shutdownEmbed.addFields({ name: 'Original Number', value: `${entry.original_number}`, inline: true });
+		if (entry.original_number != number) {
+			shutdownEmbed.addFields({ name: 'Original Number', value: `${entry.original_number}`, inline: true });
+		}
+
+		else {
+			shutdownEmbed.addFields({ name: '\u200B', value: '\u200B', inline: true });
+		}
 
 		webhook.send({
 			embeds: [shutdownEmbed],
@@ -462,7 +479,7 @@ async function removeServer(interaction, client) {
 		}
 
 		await modalInteraction.editReply('Finished removing server!');
-	}).catch(() => new Error('time'));
+	}).catch((e) => console.log(e));
 }
 
 function getCategories(interaction) {
