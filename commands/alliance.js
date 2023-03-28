@@ -515,7 +515,7 @@ async function lockServer(interaction) {
 	await Promise.all(channels.map(channel => channel.setUserLimit(0, `Locking alliance server (${interaction.member.displayName} - ${interaction.member.id})`)));
 
 	await interaction.editReply('Change permissions...');
-	await Promise.all(channels.map(channel => channel.permissionOverwrites.edit(interaction.guild.id, { ViewChannel: false, Connect: false }, { reason: `Locking alliance server (${interaction.member.displayName} - ${interaction.member.id})` })));
+	await Promise.all(channels.map(channel => channel.permissionOverwrites.edit(interaction.client.Settings.UNLOCK_VISIBILITY_ROLE_ID, { ViewChannel: false, Connect: false }, { reason: `Locking alliance server (${interaction.member.displayName} - ${interaction.member.id})` })));
 
 	await interaction.editReply(`Locked server \`${number}\``);
 }
