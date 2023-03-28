@@ -515,7 +515,9 @@ async function lockServer(interaction, config) {
 	await Promise.all(channels.map(channel => channel.setUserLimit(0, `Locking alliance server (${interaction.member.displayName} - ${interaction.member.id})`)));
 
 	await interaction.editReply('Change permissions...');
-	await Promise.all(channels.map(channel => channel.permissionOverwrites.edit(config.Settings.UNLOCK_VISIBILITY_ROLE_ID, { ViewChannel: false, Connect: false }, { reason: `Locking alliance server (${interaction.member.displayName} - ${interaction.member.id})` })));
+	await config.Settings.UNLOCK_VISIBILITY_ROLE_IDS.map(async role_id => {
+		Promise.all(channels.map(channel => channel.permissionOverwrites.edit(role_id, { ViewChannel: false, Connect: false }, { reason: `Locking alliance server (${interaction.member.displayName} - ${interaction.member.id})` })));
+	});
 
 	await interaction.editReply(`Locked server \`${number}\``);
 }
@@ -546,7 +548,9 @@ async function unlockServer(interaction, config) {
 	await Promise.all(channels.map(channel => channel.setUserLimit(ship_capacities[channel.name.match(/-(\w{1,3})]/i)[1].replace('C', '')], `Unlocking alliance server (${interaction.member.displayName} - ${interaction.member.id})`)));
 
 	await interaction.editReply('Change permissions...');
-	await Promise.all(channels.map(channel => channel.permissionOverwrites.edit(config.Settings.UNLOCK_VISIBILITY_ROLE_ID, { ViewChannel: true, Connect: true }, { reason: `Locking alliance server (${interaction.member.displayName} - ${interaction.member.id})` })));
+	await config.Settings.UNLOCK_VISIBILITY_ROLE_IDS.map(async role_id => {
+		Promise.all(channels.map(channel => channel.permissionOverwrites.edit(role_id, { ViewChannel: true, Connect: true }, { reason: `Locking alliance server (${interaction.member.displayName} - ${interaction.member.id})` })));
+	});
 
 	await interaction.editReply(`Unlocked server \`${number}\``);
 }
