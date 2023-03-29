@@ -7,7 +7,7 @@
     "url": "https://github.com/requiem-community/sot-bot-rewrite.git"
   },
   "dependencies": {
-    "discord.js": "^14.7.1",
+    "discord.js": "^14.8.0",
     "dotenv": "^16.0.3",
     "moment": "^2.29.4",
     "mongodb": "^5.1.0",
