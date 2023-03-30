@@ -69,5 +69,5 @@ class StatusUpdater {
 		if (status_indicator.name === new_name) return;
 
 		status_indicator.setName(new_name, 'Status Indicator');
-	};
+	}
 }
