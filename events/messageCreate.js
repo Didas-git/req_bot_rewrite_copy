@@ -138,6 +138,31 @@ async function leavingRequest(args, requester, leaving_channel, message, config)
 				.setStyle(ButtonStyle.Danger),
 		);
 
+	await message.delete().catch(() => null);
+	const april_fools = new Date().getMonth() == 3 && new Date().getDate() == 1;
+	if (april_fools) {
+		const april_fools_button = new ActionRowBuilder()
+			.addComponents(
+				new ButtonBuilder()
+					.setCustomId('cookie')
+					.setLabel('🍪')
+					.setStyle(ButtonStyle.Secondary),
+			);
+		const april_fools_embed_prompt = new EmbedBuilder()
+			.setDescription('The cookie monster is hungry, click the cookie to feed him!')
+			.setColor('e7c200');
+
+		const april_fools_embed_click = new EmbedBuilder()
+			.setDescription('🍪 April Fools!')
+			.setColor('e7c200');
+
+		const april_fools_prompt = await leaving_channel.send({ embeds: [april_fools_embed_prompt], components: [april_fools_button] });
+		const april_fools_filter = i => i.customId == 'cookie' && i.user.id == requester.id;
+		await april_fools_prompt.awaitMessageComponent({ filter: april_fools_filter, time: 1000 * 10 }).then(() => null).catch(() => null);
+		await april_fools_prompt.edit({ embeds: [april_fools_embed_click], components: [] });
+		await new Promise(resolve => setTimeout(resolve, 2000)).then(() => april_fools_prompt.delete());
+	}
+
 	const officer_prompt = await sot_leaving.send({ embeds: [prompt_embed], components: [officer_prompt_buttons] });
 	const logs_message = await sot_logs.send({ embeds: [log_embed] });
 	const user_message = await leaving_channel.send({ embeds: [user_embed] });
@@ -164,8 +189,6 @@ async function leavingRequest(args, requester, leaving_channel, message, config)
 	localLogMessages.set(officer_prompt.id, logs_message.id);
 
 	await redis.hSet(`leaving_req:${playerLeaving.id}`, redis_hash);
-
-	await message.delete().catch(() => null);
 
 	redis.expire(`leaving_req:${playerLeaving.id}`, 60 * 30);
 	redis.set(`warn_window:${playerLeaving.id}`, `${Date.now() + (1000 * 60 * 10)}`, { EX: 60 * 10 });
@@ -195,6 +218,7 @@ async function updatePromptColours(prompt_message, sot_leaving, client, options)
 
 async function handleInteraction(interaction) {
 	if (!interaction.isButton()) return;
+	if (interaction.customId == 'cookie') return;
 
 	const sot_logs = interaction.guild.channels.cache.find(channel => channel.name == interaction.client.config.Mentions.channels.sot_logs);
 	const help_desk = interaction.guild.channels.cache.find(channel => channel.name.endsWith(interaction.client.config.Mentions.channels.help_desk));
