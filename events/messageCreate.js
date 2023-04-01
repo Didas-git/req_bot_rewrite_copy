@@ -17,6 +17,11 @@ module.exports = {
 		redis = client.redis;
 		const { channel, author: member } = message;
 		const { config } = client;
+		const guildMember = await channel.guild.members.fetch(member.id);
+		const isOwner = client.config.OWNERS.includes(member.id);
+		const isManager = guildMember.roles.cache.some(role => client.config.MANAGER_ROLE_NAMES.includes(role.name));
+		const isSupervisor = guildMember.roles.cache.some(role => client.config.SUPERVISOR_ROLE_NAMES.includes(role.name));
+		const isStaff = guildMember.roles.cache.some(role => client.config.STAFF_ROLE_NAMES.includes(role.name));
 
 		if (!listener_attached) {
 			client.on('interactionCreate', handleInteraction);
@@ -47,13 +52,13 @@ module.exports = {
 			break;
 
 		case 'set-locked-sotalliances':
-			if (!member.roles.cache.has(config.Mentions.roles.officer)) return;
-			redis.set('state:alliance_locked', 'true');
+			if (!(isOwner || isManager || isSupervisor || isStaff)) return;
+			redis.set('state:alliance_locked', 1);
 			break;
 
 		case 'set-unlocked-sotalliances':
-			if (!member.roles.cache.has(config.Mentions.roles.officer)) return;
-			redis.set('state:alliance_locked', 'false');
+			if (!(isOwner || isManager || isSupervisor || isStaff)) return;
+			redis.set('state:alliance_locked', 0);
 			break;
 		}
 	},
