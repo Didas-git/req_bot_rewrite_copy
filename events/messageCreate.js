@@ -169,6 +169,14 @@ async function leavingRequest(args, requester, leaving_channel, message, config)
 			['I am happy, click the button to make me sad!', '😀'],
 			['There\'s a bug in the system, click the button to report it!', '🐛'],
 			['You weren\'t supposed to leave this soon, you\'ll need to stay', '✅'],
+			['The network is slow, click the button to speed it up!', '🐢'],
+			['You\'ve been working too hard, click the button to take a break!', '🏖️'],
+			['The code isn\'t working, click the button to debug it!', '🐞'],
+			['Your computer crashed, click the button to recover your work!', '💾'],
+			['There\'s a power outage, click the button to start the generator!', '🔌'],
+			['A meteor is heading towards Earth, click the button to deflect it!', '☄️'],
+			['Your keyboard is sticky, click the button to clean it!', '🧹'],
+			['The wifi is down, click the button to troubleshoot it!', '📡'],
 		];
 
 		const prompt = prompts[Math.floor(Math.random() * prompts.length)];
