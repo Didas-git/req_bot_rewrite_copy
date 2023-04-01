@@ -72,7 +72,7 @@ async function helpDeskNotification(state, client, oldState, isMoved = false) {
 			.setDescription(`**${state.member} moved from ${oldState.channel} to the help desk.**`)
 			.setColor('e66700');
 
-		return sot_logs.send({ embeds: [movedEmbed] });
+		return await sot_logs.send({ embeds: [movedEmbed] });
 	}
 
 	const april_fools = new Date().getMonth() == 3 && new Date().getDate() == 1;
