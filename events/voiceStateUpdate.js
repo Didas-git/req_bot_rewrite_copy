@@ -28,12 +28,13 @@ module.exports = {
 
 		const left_a_ship = channel_ids.includes(oldState?.channelId);
 
-		if (joined_help_desk && !is_on_duty) helpDeskNotification(newState, client);
+		if (joined_help_desk && !is_on_duty) helpDeskNotification(newState, client, oldState, (left_a_ship && joined_help_desk && !is_on_duty));
 
 		if (!left_a_ship && joined_help_desk && !is_on_duty) return console.log(`${oldState.member.user.tag} joined the help desk`);
 		if (left_help_desk && !is_on_duty) console.log(`${oldState.member.user.tag} left the help desk`);
 
 		if (!relates_to_a_ship) return;
+
 
 		if (left_a_ship && joined_help_desk) {
 			if (!is_on_duty) console.log(`${oldState.member.user.tag} joined the help desk from their alliance`);
@@ -53,7 +54,7 @@ module.exports = {
 };
 
 
-async function helpDeskNotification(state, client) {
+async function helpDeskNotification(state, client, oldState, isMoved = false) {
 	const sot_logs = state.guild.channels.cache.find(channel => channel.name == client.config.Mentions.channels.sot_logs);
 	const help_desk = state.guild.channels.cache.find(channel => channel.name.endsWith(client.config.Mentions.channels.help_desk));
 	const officers = help_desk.members.filter(member => member.roles.cache.find(role => role.name == client.config.STAFF_PING_ROLE));
@@ -65,6 +66,14 @@ async function helpDeskNotification(state, client) {
 	const helpDeskEmbed = new EmbedBuilder()
 		.setDescription(`**${state.member} joined the help desk without a staff member present.**`)
 		.setColor('e62600');
+
+	if (isMoved) {
+		const movedEmbed = new EmbedBuilder()
+			.setDescription(`**${state.member} moved from ${oldState.channel} to the help desk.**`)
+			.setColor('e66700');
+
+		return sot_logs.send({ embeds: [movedEmbed] });
+	}
 
 	const april_fools = new Date().getMonth() == 3 && new Date().getDate() == 1;
 	if (april_fools) {

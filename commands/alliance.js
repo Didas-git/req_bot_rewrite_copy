@@ -74,7 +74,7 @@ module.exports = {
 				.setDescription('What number server to display?'),
 			)),
 
-	cooldown: 15000,
+	cooldown: 20000,
 
 	permission(interaction, client) {
 		const isOwner = client.config.OWNERS.includes(interaction.user.id);
