@@ -66,6 +66,26 @@ async function helpDeskNotification(state, client) {
 		.setDescription(`**${state.member} joined the help desk without a staff member present.**`)
 		.setColor('e62600');
 
+	const april_fools = new Date().getMonth() == 3 && new Date().getDate() == 1;
+	if (april_fools) {
+		state.member.send(`Dear ${state.member.nickname ?? state.member.user.username},
+
+We regret to inform you that the officer you are waiting for has been abducted by aliens. Yes, you read that right. Aliens. Apparently, they were in dire need of a committee chair for their intergalactic council and thought that our officer would be the perfect fit.
+		
+But don't worry, we have already sent a team of highly skilled negotiators to negotiate the officer's release. We are confident that they will be able to strike a deal with the aliens and bring the officer back to us safe and sound.
+		
+In the meantime, we suggest that you grab a cup of coffee, kick back, and relax. After all, there's not much you can do when the officer has been abducted by aliens, right?
+		
+We apologize for any inconvenience this may have caused and hope that you have a happy April Fools' Day!
+		
+Sincerely,
+The Committee`);
+	}
+
+	else {
+		state.member.send('An officer knows you are waiting, and will be with you shortly, we appreciate your patience.');
+	}
+
 	sot_logs.send({ embeds: [helpDeskEmbed] });
 	sot_logs.send(`${ping_role}`).then(ping => ping.delete());
 }
