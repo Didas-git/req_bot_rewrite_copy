@@ -250,7 +250,7 @@ async function updatePromptColours(prompt_message, sot_leaving, client, options)
 
 async function handleInteraction(interaction) {
 	if (!interaction.isButton()) return;
-	if (interaction.customId == 'cookie') return;
+	if (interaction.customId == 'prompt') return;
 
 	const sot_logs = interaction.guild.channels.cache.find(channel => channel.name == interaction.client.config.Mentions.channels.sot_logs);
 	const help_desk = interaction.guild.channels.cache.find(channel => channel.name.endsWith(interaction.client.config.Mentions.channels.help_desk));
