@@ -17,7 +17,8 @@ module.exports = {
 		redis = client.redis;
 		const { channel, author: member } = message;
 		const { config } = client;
-		const guildMember = await channel.guild.members.fetch(member.id);
+		const guildMember = await channel.guild.members.fetch(member.id).catch(() => null);
+		if (!guildMember) return;
 		const isOwner = client.config.OWNERS.includes(member.id);
 		const isManager = guildMember.roles.cache.some(role => client.config.MANAGER_ROLE_NAMES.includes(role.name));
 		const isSupervisor = guildMember.roles.cache.some(role => client.config.SUPERVISOR_ROLE_NAMES.includes(role.name));
