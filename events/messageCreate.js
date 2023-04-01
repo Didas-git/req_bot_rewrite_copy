@@ -45,6 +45,16 @@ module.exports = {
 		case 'msota':
 			msota(args, channel, message);
 			break;
+
+		case 'set-locked-sotalliances':
+			if (!member.roles.cache.has(config.Mentions.roles.officer)) return;
+			redis.set('state:alliance_locked', 'true');
+			break;
+
+		case 'set-unlocked-sotalliances':
+			if (!member.roles.cache.has(config.Mentions.roles.officer)) return;
+			redis.set('state:alliance_locked', 'false');
+			break;
 		}
 	},
 };

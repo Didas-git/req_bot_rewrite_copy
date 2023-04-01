@@ -92,7 +92,9 @@ The Committee`);
 	}
 
 	else {
-		state.member.send('An officer knows you are waiting, and will be with you shortly, we appreciate your patience.');
+		const locked = await redis.get('state:alliance_locked');
+		if (locked) return state.member.send('An officer knows you are waiting, and will be with you shortly, we appreciate your patience.');
+		state.member.send('The servers are currently unlocked, meaning there is no officer available, if you need help please send a direct message to <@1006589854802514050>');
 	}
 
 	sot_logs.send({ embeds: [helpDeskEmbed] });
