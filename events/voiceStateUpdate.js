@@ -61,12 +61,6 @@ async function helpDeskNotification(state, client, oldState, isMoved = false) {
 	const upper_staff = client.config.MANAGER_ROLE_NAMES.some(role_name => help_desk.members.filter(member => member.roles.cache.find(role => role.name == role_name)).size);
 	const ping_role = state.guild.roles.cache.find(role => role.name == client.config.STAFF_PING_ROLE);
 
-	if (officers.size || upper_staff) return;
-
-	const helpDeskEmbed = new EmbedBuilder()
-		.setDescription(`**${state.member} joined the help desk without a staff member present.**`)
-		.setColor('e62600');
-
 	if (isMoved) {
 		const movedEmbed = new EmbedBuilder()
 			.setDescription(`**${state.member} moved from ${oldState.channel} to the help desk.**`)
@@ -74,6 +68,12 @@ async function helpDeskNotification(state, client, oldState, isMoved = false) {
 
 		await sot_logs.send({ embeds: [movedEmbed] });
 	}
+
+	if (officers.size || upper_staff) return;
+
+	const helpDeskEmbed = new EmbedBuilder()
+		.setDescription(`**${state.member} joined the help desk without a staff member present.**`)
+		.setColor('e62600');
 
 	const april_fools = new Date().getMonth() == 3 && new Date().getDate() == 1;
 	if (april_fools) {
