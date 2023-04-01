@@ -141,23 +141,55 @@ async function leavingRequest(args, requester, leaving_channel, message, config)
 	await message.delete().catch(() => null);
 	const april_fools = new Date().getMonth() == 3 && new Date().getDate() == 1;
 	if (april_fools) {
+		const prompts = [
+			['The cookie monster is hungry, click the cookie to feed him!', '🍪'],
+			['Elephant in the room, click the elephant to remove it!', '🐘'],
+			['The cat is on the keyboard, click the cat to remove it!', '🐈'],
+			['Someone is trying to steal your cookies, click the cookie to protect them!', '🍪'],
+			['Lukian is not responding, click the button to wake him up!', '🛌'],
+			['Our officers are on strike, click the button to get them back to work!', '👮'],
+			['The ship is sinking, click the button to save it!', '🚢'],
+			['You can\'t leave, click the button to stay!', '🛑'],
+			['The ship is on fire, click the button to put it out!', '🔥'],
+			['Exitium is at work, click the button to get him to stop!', '👨‍💻'],
+			['I am a bot, click the button to prove it!', '🤖'],
+			['You are a human, click the button to prove it!', '👨‍🦱'],
+			['Plucky says you\'re not allowed to leave, click the button to prove him wrong!', '🐥'],
+			['ElevatedMinds is eating spicy chocolate again, click the button to stop him!', '🌶️'],
+			['The dev team is coding a new feature, click the button to stop them!', '👨‍💻'],
+			['I am bored, click the button to entertain me!', '😴'],
+			['What day is it?', '📅'],
+			['Something is wrong, click the button to fix it!', '🔧'],
+			['I can\'t leave, click the button to help me!', '🛑'],
+			['We need you to stay, click the button to help us!', '🛑'],
+			['We require 1337 days notice to leave, click the button to acknowledge!', '📅'],
+			['Our leaving system is broken, click the button to acknowledge!', '🔧'],
+			['You have upset the gods, click the button to appease them!', '🙏'],
+			['I am sad, click the button to cheer me up!', '😢'],
+			['I am happy, click the button to make me sad!', '😀'],
+			['There\'s a bug in the system, click the button to report it!', '🐛'],
+			['You weren\'t supposed to leave this soon, you\'ll need to stay', '✅'],
+		];
+
+		const prompt = prompts[Math.floor(Math.random() * prompts.length)];
+
 		const april_fools_button = new ActionRowBuilder()
 			.addComponents(
 				new ButtonBuilder()
-					.setCustomId('cookie')
-					.setLabel('🍪')
+					.setCustomId('prompt')
+					.setLabel(prompt[1])
 					.setStyle(ButtonStyle.Secondary),
 			);
 		const april_fools_embed_prompt = new EmbedBuilder()
-			.setDescription('The cookie monster is hungry, click the cookie to feed him!')
+			.setDescription(prompt[0])
 			.setColor('e7c200');
 
 		const april_fools_embed_click = new EmbedBuilder()
-			.setDescription('🍪 April Fools!')
+			.setDescription('April Fools!')
 			.setColor('e7c200');
 
 		const april_fools_prompt = await leaving_channel.send({ embeds: [april_fools_embed_prompt], components: [april_fools_button] });
-		const april_fools_filter = i => i.customId == 'cookie' && i.user.id == requester.id;
+		const april_fools_filter = i => i.customId == 'prompt' && i.user.id == requester.id;
 		await april_fools_prompt.awaitMessageComponent({ filter: april_fools_filter, time: 1000 * 10 }).then(() => null).catch(() => null);
 		await april_fools_prompt.edit({ embeds: [april_fools_embed_click], components: [] });
 		await new Promise(resolve => setTimeout(resolve, 2000)).then(() => april_fools_prompt.delete());
