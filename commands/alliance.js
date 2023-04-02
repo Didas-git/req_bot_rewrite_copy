@@ -387,7 +387,13 @@ async function removeServer(interaction, client) {
 
 		await modalInteraction.editReply('Delete role...');
 		let delete_role = await interaction.guild.roles.cache.find(role => role.name == `SOTA-${number}`);
-		if (!delete_role) interaction.guild.roles.fetch().then(roles => delete_role = roles.cache.find(role => role.name == `SOTA-${number}`));
+		if (!delete_role) {
+			await interaction.guild.roles.fetch();
+			delete_role = await interaction.guild.roles.cache.find(role => role.name == `SOTA-${number}`);
+		}
+
+		if (!delete_role) return modalInteraction.editReply('Role does not exist!');
+
 		await bucket.queue(async () => await delete_role?.delete(`Removing alliance server (${interaction.member.displayName} - ${interaction.member.id})`), { weight: 1000 });
 
 		await modalInteraction.editReply('Rename other servers...');
