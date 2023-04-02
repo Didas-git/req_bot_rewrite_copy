@@ -188,7 +188,8 @@ async function checkLeavingRequest(voiceState, client) {
 }
 
 async function no_leaving_request(voiceState, sot_logs) {
-	const { member } = voiceState;
+	const { member, channel } = voiceState;
+	if (!channel) return;
 
 	const log_embed = new EmbedBuilder()
 		.setDescription(`**${member} left ${voiceState.channel} without permission.**`)
