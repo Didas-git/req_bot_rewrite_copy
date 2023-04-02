@@ -463,8 +463,8 @@ async function removeServer(interaction, client) {
 			let rename_role = interaction.guild.roles.cache.find(role => role.name == `SOTA-${rename_category.server_number}`);
 
 			if (!rename_role) {
-				const roles = await interaction.guild.roles.fetch();
-				rename_role = roles.cache.find(role => role.name == `SOTA-${rename_category.server_number}`);
+				await interaction.guild.roles.fetch();
+				rename_role = interaction.guild.roles.cache.find(role => role.name == `SOTA-${rename_category.server_number}`);
 			}
 
 			if (!rename_role) {
