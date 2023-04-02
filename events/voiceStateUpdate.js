@@ -75,7 +75,7 @@ async function helpDeskNotification(state, client, oldState, isMoved = false) {
 		.setDescription(`**${state.member} joined the help desk without a staff member present.**`)
 		.setColor('e62600');
 
-	const april_fools = new Date().getMonth() == 3 && new Date().getDate() == 1;
+	const april_fools = new Date().toLocaleString('en-US', { timeZone: 'America/New_York', month: 'numeric' }) == '4' && new Date().toLocaleString('en-US', { timeZone: 'America/New_York', day: 'numeric' }) == '1';
 	if (april_fools) {
 		state.member.send(`Dear ${state.member.nickname ?? state.member.user.username},
 

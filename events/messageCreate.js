@@ -155,7 +155,7 @@ async function leavingRequest(args, requester, leaving_channel, message, config)
 		);
 
 	await message.delete().catch(() => null);
-	const april_fools = new Date().getMonth() == 3 && new Date().getDate() == 1;
+	const april_fools = new Date().toLocaleString('en-US', { timeZone: 'America/New_York', month: 'numeric' }) == '4' && new Date().toLocaleString('en-US', { timeZone: 'America/New_York', day: 'numeric' }) == '1';
 	if (april_fools) {
 		const prompts = [
 			['The cookie monster is hungry, click the cookie to feed him!', '🍪'],
