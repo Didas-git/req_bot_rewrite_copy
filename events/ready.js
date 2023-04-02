@@ -72,6 +72,9 @@ module.exports = {
 		// Start the bucket service
 		client.bucket = new Bucket(client);
 		client.bucket.start();
+
+		// Start applying SoTA roles
+		require(client.root + '/modules/sota-reapply.js')(client);
 	},
 };
 
