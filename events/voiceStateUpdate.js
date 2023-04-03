@@ -88,13 +88,13 @@ In the meantime, we suggest that you grab a cup of coffee, kick back, and relax.
 We apologize for any inconvenience this may have caused and hope that you have a happy April Fools' Day!
 		
 Sincerely,
-The Committee`);
+The Committee`).catch(() => null);
 	}
 
 	else {
 		const locked = await redis.get('state:alliance_locked').then(returnedState => Number(returnedState)) ?? true;
-		if (locked) return state.member.send('An officer knows you are waiting, and will be with you shortly, we appreciate your patience.');
-		state.member.send('The servers are currently unlocked, meaning there is no officer available, if you need help please send a direct message to <@1006589854802514050>');
+		if (locked) return state.member.send('An officer knows you are waiting, and will be with you shortly, we appreciate your patience.').catch(() => null);
+		state.member.send('The servers are currently unlocked, meaning there is no officer available, if you need help please send a direct message to <@1006589854802514050>').catch(() => null);
 	}
 
 	sot_logs.send({ embeds: [helpDeskEmbed] });

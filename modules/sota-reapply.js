@@ -31,7 +31,8 @@ class SotaApplicator {
 	apply() {
 		const members = this.getMembers();
 		members.forEach(member => this.client.bucket.queue(async () => {
-			const number = member.voice.channel.parent.name.match(/\d+/)[0];
+			const number = member.voice.channel?.parent.name.match(/\d+/)[0];
+			if (!number) return;
 			const sota_role = member.guild.roles.cache.find(role => role.name === `SOTA-${number}`);
 			if (!sota_role) return;
 			if (member.roles.cache.has(sota_role.id)) return;
