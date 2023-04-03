@@ -108,8 +108,8 @@ module.exports = {
 	},
 
 	async execute(interaction, client) {
-		if (interaction.channel.name.match(/^server\d+_/) && interaction.options.getSubcommand() != 'info') return interaction.editReply('Please run this in a commands channel.');
-		if (!client.dbConnected) return interaction.editReply('The database is currently unavailable.');
+		if (interaction.channel.name.match(/^server\d+_/) && interaction.options.getSubcommand() != 'info') return interaction.reply('Please run this in a commands channel.');
+		if (!client.dbReady) return interaction.reply('The database is currently unavailable.');
 
 		switch (interaction.options.getSubcommand()) {
 
@@ -293,7 +293,7 @@ async function createServer(interaction, client) {
 	await createChannels(interaction, number, category, permissions);
 
 	await interaction.editReply('Attach status refresher...');
-	client.status_updaters.get(interaction.guild.id).add(category);
+	client.status_updaters.get(`${interaction.guild.id}`).add(category);
 
 	await interaction.editReply('Post embeds...');
 	await postEmbeds(interaction, category);
