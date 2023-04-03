@@ -109,6 +109,7 @@ module.exports = {
 
 	async execute(interaction, client) {
 		if (interaction.channel.name.match(/^server\d+_/) && interaction.options.getSubcommand() != 'info') return interaction.editReply('Please run this in a commands channel.');
+		if (!client.dbConnected) return interaction.editReply('The database is currently unavailable.');
 
 		switch (interaction.options.getSubcommand()) {
 
