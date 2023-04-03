@@ -2,7 +2,7 @@ const { ChannelType } = require('discord.js');
 
 module.exports = (client) => {
 	client.sota_applicators = new Map();
-	client.guilds.cache.forEach(guild => client.status_updaters.set(guild.id, new SotaApplicator(client, guild)));
+	client.guilds.cache.forEach(guild => client.sota_applicators.set(guild.id, new SotaApplicator(client, guild)));
 };
 
 class SotaApplicator {
