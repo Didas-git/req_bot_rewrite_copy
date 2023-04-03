@@ -9,6 +9,7 @@ class SotaApplicator {
 	constructor(client, guild) {
 		this.client = client;
 		this.guild = guild;
+		this.role = guild.roles.cache.find(role => role.name == client.config.STAFF_PING_ROLE);
 
 		setInterval(() => this.apply(), 1000 * 60 * 10);
 	}
@@ -31,6 +32,7 @@ class SotaApplicator {
 	apply() {
 		const members = this.getMembers();
 		members.forEach(member => this.client.bucket.queue(async () => {
+			if (member.roles.cache.has(this.role.id)) return;
 			const number = member.voice.channel?.parent.name.match(/\d+/)[0];
 			if (!number) return;
 			const sota_role = member.guild.roles.cache.find(role => role.name === `SOTA-${number}`);
