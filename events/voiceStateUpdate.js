@@ -13,9 +13,9 @@ module.exports = {
 		const categories = getCategories(newState.guild);
 		const channel_ids = await Promise.all(categories.map(category => getServerShipChannels(category).then(server => server.map(channel => channel.id)))).then(ids => ids.flat());
 		const help_desk = oldState.guild.channels.cache.find(channel => channel.name.endsWith(client.config.Mentions.channels.help_desk));
-		const is_on_duty = oldState.member?.roles.cache.find(role => role.name == client.config.STAFF_PING_ROLE);
+		const is_on_duty = oldState.member?.roles.cache.find(role => role.name == client.config.STAFF_PING_ROLE) ?? false;
 
-		let relates_to_a_ship = [oldState.channelId, newState.channelId].some(ship_channel_id => channel_ids.includes(ship_channel_id));
+		let relates_to_a_ship = [oldState?.channelId ?? false, newState?.channelId ?? false].some(ship_channel_id => channel_ids.includes(ship_channel_id));
 		const [joined_help_desk, left_help_desk] = [newState.channelId == help_desk.id, oldState.channelId == help_desk.id];
 
 		const joined_a_ship = channel_ids.includes(newState?.channelId);
@@ -30,9 +30,8 @@ module.exports = {
 
 		if (joined_help_desk && !is_on_duty) helpDeskNotification(newState, client, oldState, (left_a_ship && joined_help_desk && !is_on_duty));
 
-		if (!left_a_ship && joined_help_desk && !is_on_duty) return console.log(`${oldState.member.user.tag} joined the help desk`);
+		if (!left_a_ship && joined_help_desk && !is_on_duty) console.log(`${oldState.member.user.tag} joined the help desk`);
 		if (left_help_desk && !is_on_duty) console.log(`${oldState.member.user.tag} left the help desk`);
-
 		if (!relates_to_a_ship) return;
 
 
@@ -58,7 +57,7 @@ async function helpDeskNotification(state, client, oldState, isMoved = false) {
 	const sot_logs = state.guild.channels.cache.find(channel => channel.name == client.config.Mentions.channels.sot_logs);
 	const help_desk = state.guild.channels.cache.find(channel => channel.name.endsWith(client.config.Mentions.channels.help_desk));
 	const officers = help_desk.members.filter(member => member.roles.cache.find(role => role.name == client.config.STAFF_PING_ROLE));
-	const upper_staff = client.config.MANAGER_ROLE_NAMES.some(role_name => help_desk.members.filter(member => member.roles.cache.find(role => role.name == role_name)).size);
+	const upper_staff = client.config.MANAGER_ROLE_NAMES.some(role_name => help_desk.members.filter(member => member.id != state.member.id).filter(member => member.roles.cache.find(role => role.name == role_name)).size);
 	const ping_role = state.guild.roles.cache.find(role => role.name == client.config.STAFF_PING_ROLE);
 
 	if (isMoved) {
@@ -76,26 +75,64 @@ async function helpDeskNotification(state, client, oldState, isMoved = false) {
 		.setColor('e62600');
 
 	const april_fools = new Date().toLocaleString('en-US', { timeZone: 'America/New_York', month: 'numeric' }) == '4' && new Date().toLocaleString('en-US', { timeZone: 'America/New_York', day: 'numeric' }) == '1';
-	if (april_fools) {
-		state.member.send(`Dear ${state.member.nickname ?? state.member.user.username},
+	const christmas = new Date().toLocaleString('en-US', { timeZone: 'America/New_York', month: 'numeric' }) == '12' && new Date().toLocaleString('en-US', { timeZone: 'America/New_York', day: 'numeric' }) == '25';
+	const new_years_day = new Date().toLocaleString('en-US', { timeZone: 'America/New_York', month: 'numeric' }) == '1' && new Date().toLocaleString('en-US', { timeZone: 'America/New_York', day: 'numeric' }) == '1';
 
-We regret to inform you that the officer you are waiting for has been abducted by aliens. Yes, you read that right. Aliens. Apparently, they were in dire need of a committee chair for their intergalactic council and thought that our officer would be the perfect fit.
-		
-But don't worry, we have already sent a team of highly skilled negotiators to negotiate the officer's release. We are confident that they will be able to strike a deal with the aliens and bring the officer back to us safe and sound.
-		
-In the meantime, we suggest that you grab a cup of coffee, kick back, and relax. After all, there's not much you can do when the officer has been abducted by aliens, right?
-		
-We apologize for any inconvenience this may have caused and hope that you have a happy April Fools' Day!
-		
-Sincerely,
-The Committee`).catch(() => null);
+	const locked = await redis.get('state:alliance_locked').then(returnedState => Number(returnedState)) ?? true;
+	if (locked && !april_fools && !christmas && !new_years_day) {
+		return state.member.send('An officer knows you are waiting, and will be with you shortly, we appreciate your patience.').catch(() => null);
 	}
 
 	else {
-		const locked = await redis.get('state:alliance_locked').then(returnedState => Number(returnedState)) ?? true;
-		if (locked) return state.member.send('An officer knows you are waiting, and will be with you shortly, we appreciate your patience.').catch(() => null);
-		state.member.send('The servers are currently unlocked, meaning there is no officer available, if you need help please send a direct message to <@1006589854802514050>').catch(() => null);
+		if (april_fools) {
+			state.member.send(`Dear ${state.member.nickname ?? state.member.user.username},
+	
+	We regret to inform you that the officer you are waiting for has been abducted by aliens. Yes, you read that right. Aliens. Apparently, they were in dire need of a committee chair for their intergalactic council and thought that our officer would be the perfect fit.
+			
+	But don't worry, we have already sent a team of highly skilled negotiators to negotiate the officer's release. We are confident that they will be able to strike a deal with the aliens and bring the officer back to us safe and sound.
+			
+	In the meantime, we suggest that you grab a cup of coffee, kick back, and relax. After all, there's not much you can do when the officer has been abducted by aliens, right?
+			
+	We apologize for any inconvenience this may have caused and hope that you have a happy April Fools' Day!
+			
+	Sincerely,
+	The Committee`).catch(() => null);
+		}
+
+		if (christmas) {
+			state.member.send(`Dear ${state.member.nickname ?? state.member.user.username},
+	
+	We're reaching out with an unexpected twist to your holiday anticipation. Brace yourself for a tale that's not quite like any Christmas story you've heard before.
+	
+	Our esteemed officer is on a special assignment that's straight out of a holiday blockbuster. It turns out, they've been chosen as the official cookie taster for an elite group of interdimensional gingerbread bakers. Yes, you read that right – gingerbread from other realms!
+	
+	The enchanted bakers apparently recognized our officer's impeccable taste buds and couldn't resist inviting them to join in the festive culinary exchange. Fear not, though, as we've dispatched a team of seasoned flavor negotiators to ensure the safe return of our officer once the tasting extravaganza concludes.
+	
+	In the meantime, we suggest you whip up your favorite holiday treats, share the joy with loved ones, and perhaps experiment with some out-of-this-world cookie recipes. After all, 'tis the season for unexpected sweetness!
+	
+	We sincerely apologize for any delightful disruption this news may cause and wish you a joyous and uniquely flavorful holiday season.
+	
+	Warmly,
+	The Holiday Treat Committee`).catch(() => null);
+		}
+
+		if (new_years_day) {
+			state.member.send(`Dear ${state.member.nickname ?? state.member.user.username},
+	
+	Hold onto your hats, for we bring you news that will add a cosmic sparkle to your New Year's anticipation. Our awaited officer has taken on a role that transcends the ordinary celebrations – they've been chosen as the intergalactic dance instructor for the annual Cosmic Ball that unfolds as the clock strikes midnight across the universe.
+	
+	Picture this: our officer guiding extraterrestrial beings and celestial entities in a dance that harmonizes the cosmic energies for a synchronized start to the New Year. It seems their dance moves are not only a hit on Earth but have garnered attention across the cosmos.
+	
+	Worry not, as we've dispatched a team of rhythm negotiators to work with the Cosmic DJ and ensure our officer returns just in time for the traditional New Year's toast. In the meantime, we encourage you to put on your dancing shoes, revel in the music of the cosmos, and welcome the New Year with a celestial twirl of your own.
+	
+	We apologize for the unexpected dance floor twist and wish you a New Year filled with unique rhythms, celestial joys, and extraordinary moments.
+	
+	Dancing through dimensions,
+	The Cosmic Celebration Committee`).catch(() => null);
+		}
 	}
+
+	if (!locked) return state.member.send('The servers are currently unlocked, meaning there is no officer available, if you need help please send a direct message to <@1006589854802514050>').catch(() => null);
 
 	sot_logs.send({ embeds: [helpDeskEmbed] });
 	sot_logs.send(`${ping_role}`).then(ping => ping.delete());
