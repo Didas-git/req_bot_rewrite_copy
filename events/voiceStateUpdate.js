@@ -66,6 +66,7 @@ async function helpDeskNotification(state, client, oldState, isMoved = false) {
 			.setColor('e66700');
 
 		await sot_logs.send({ embeds: [movedEmbed] });
+		return sot_logs.send(`${ping_role}`).then(ping => ping.delete());
 	}
 
 	if (officers.size || upper_staff) return;
