@@ -80,7 +80,7 @@ async function helpDeskNotification(state, client, oldState, isMoved = false) {
 
 	const locked = await redis.get('state:alliance_locked').then(returnedState => Number(returnedState)) ?? true;
 	if (locked && !april_fools && !christmas && !new_years_day) {
-		return state.member.send('An officer knows you are waiting, and will be with you shortly, we appreciate your patience.').catch(() => null);
+		state.member.send('An officer knows you are waiting, and will be with you shortly, we appreciate your patience.').catch(() => null);
 	}
 
 	else {
