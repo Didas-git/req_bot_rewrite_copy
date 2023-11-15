@@ -553,7 +553,7 @@ async function unlockServer(interaction, config) {
 	};
 
 	await interaction.editReply('Set channel limits...');
-	await Promise.all(channels.map(channel => channel.setUserLimit(ship_capacities[channel.name.match(/-(\w{1,3})]/i)[1].replace('C', '')], `Unlocking alliance server (${interaction.member.displayName} - ${interaction.member.id})`)));
+	await Promise.all(channels.map(channel => channel.setUserLimit(ship_capacities[channel.name.match(/-(\w{1,3})]/i)[1].slice(-1)], `Unlocking alliance server (${interaction.member.displayName} - ${interaction.member.id})`)));
 
 	await interaction.editReply('Change permissions...');
 	await config.Settings.UNLOCK_VISIBILITY_ROLE_IDS.map(async role_id => {
