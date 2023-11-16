@@ -405,7 +405,7 @@ async function removeServer(interaction, client) {
 		const uptime = Math.floor((Date.now() - entry.creation.time) / 1000 / 60 / 60) + 'h ' + (Math.floor((Date.now() - entry.creation.time) / 1000 / 60) % 60 + 'm').padStart(3, '0');
 
 		const { _id, ships, creation } = entry;
-		collection.updateOne({ current_number: Number(number) },
+		collection.updateOne({ current_number: Number(number), shutdown: { $exists: false } },
 			{
 				$set: {
 					current_number: null,
