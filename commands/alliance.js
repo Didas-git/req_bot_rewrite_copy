@@ -400,7 +400,7 @@ async function removeServer(interaction, client) {
 		await modalInteraction.editReply('Rename other servers...');
 		const rename_category = getCategories(interaction).first();
 
-		const entry = await collection.findOne({ current_number: number }, { projection: { creation: 1, original_number: 1, ships: 1 } });
+		const entry = await collection.findOne({ current_number: number }, { projection: { creation: 1, original_number: 1, ships: 1 } }, { shutdown: { $exists: false } });
 		if (!entry) return modalInteraction.editReply('Could not find database entry, failed to rename.');
 		const uptime = Math.floor((Date.now() - entry.creation.time) / 1000 / 60 / 60) + 'h ' + (Math.floor((Date.now() - entry.creation.time) / 1000 / 60) % 60 + 'm').padStart(3, '0');
 
