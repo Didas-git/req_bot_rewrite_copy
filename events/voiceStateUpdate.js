@@ -13,10 +13,22 @@ module.exports = {
 		const categories = getCategories(newState.guild);
 		const channel_ids = await Promise.all(categories.map(category => getServerShipChannels(category).then(server => server.map(channel => channel.id)))).then(ids => ids.flat());
 		const help_desk = oldState.guild.channels.cache.find(channel => channel.name.endsWith(client.config.Mentions.channels.help_desk));
+		const waiting_room = oldState.guild.channels.cache.find(channel => channel.name.endsWith(client.config.Mentions.channels.waiting_room));
+		const supporter_room = oldState.guild.channels.cache.find(channel => channel.name.endsWith(client.config.Mentions.channels.supporter_room));
 		const is_on_duty = oldState.member?.roles.cache.find(role => role.name == client.config.STAFF_PING_ROLE) ?? false;
 
 		let relates_to_a_ship = [oldState?.channelId ?? false, newState?.channelId ?? false].some(ship_channel_id => channel_ids.includes(ship_channel_id));
 		const [joined_help_desk, left_help_desk] = [newState.channelId == help_desk.id, oldState.channelId == help_desk.id];
+		const joined_queue = newState.channelId == waiting_room.id || newState.channelId == supporter_room.id;
+		const locked = await redis.get('state:alliance_locked').then(returnedState => Number(returnedState)) ?? true;
+
+		if(joined_queue && !locked) {
+			const unlocked_embed = new EmbedBuilder()
+				.setDescription(`**Servers Unlocked**\n\nWe're sending you this message to inform you that the __servers are currently unlocked__. This means you can join a ship withot an officer present.\nPlease try your best to follow the order of the queue, and when you wish to leave, inform the queue that your spot has become available.\n\nPlease beware that leaving requests are not required, you may leave at many time, and that you should follow all rules of our community.\n\nIf you require any help, please send a direct message to <@1006589854802514050>.`)
+				.setColor('e66700');
+			
+			return newState.member.send({ embeds: [unlocked_embed] }).catch(() => null);
+		}
 
 		const joined_a_ship = channel_ids.includes(newState?.channelId);
 

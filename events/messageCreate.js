@@ -55,11 +55,13 @@ module.exports = {
 		case 'set-locked-sotalliances':
 			if (!(isOwner || isManager || isSupervisor || isStaff)) return;
 			redis.set('state:alliance_locked', 1);
+			message.reply('❎ Alliances notifications disabled');
 			break;
 
 		case 'set-unlocked-sotalliances':
 			if (!(isOwner || isManager || isSupervisor || isStaff)) return;
 			redis.set('state:alliance_locked', 0);
+			message.reply('✅ Alliances notifications enabled');
 			break;
 		}
 	},
