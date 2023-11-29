@@ -24,7 +24,7 @@ module.exports = {
 
 		if(joined_queue && !locked) {
 			const unlocked_embed = new EmbedBuilder()
-				.setDescription(`**Servers Unlocked**\n\nWe're sending you this message to inform you that the __servers are currently unlocked__. This means you can join a ship withot an officer present.\nPlease try your best to follow the order of the queue, and when you wish to leave, inform the queue that your spot has become available.\n\nPlease beware that leaving requests are not required, you may leave at many time, and that you should follow all rules of our community.\n\nIf you require any help, please send a direct message to <@1006589854802514050>.`)
+				.setDescription(`**Alliance Servers Unlocked**\n\nWe're sending you this message to inform you that the __servers are currently unlocked__.\n\nThis means you can join a ship withot an officer present.\nPlease try your best to follow the order of the queue, and when you wish to leave, inform the queue that your spot has become available.\n\nPlease beware that leaving requests are not required, you may leave at many time, and that you should follow all rules of our community.\n\nIf you require any help, please send a direct message to <@1006589854802514050>.`)
 				.setColor('e66700');
 			
 			return newState.member.send({ embeds: [unlocked_embed] }).catch(() => null);
