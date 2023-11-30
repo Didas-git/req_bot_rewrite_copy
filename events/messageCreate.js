@@ -70,8 +70,9 @@ module.exports = {
 			if (!whereis_user_id) return message.reply('Invalid user');
 			const whereis_user = await message.guild.members.fetch(whereis_user_id).catch(() => null);
 			const user_channel = whereis_user.voice.channel;
+			const user = whereis_user.user;
 			if(!user_channel) return message.reply('User is not in a voice channel');
-			message.reply(`User is in ${user_channel}`);
+			message.reply(`${user} is in ${user_channel}`);
 		}
 	},
 };
