@@ -68,8 +68,8 @@ module.exports = {
 			if((!(isOwner || isManager || isSupervisor || isStaff))) return;
 			console.log(args)
 			console.log(args[0])
-			console.log(args[0].match(/d+/i))
-			const whereis_user_id = args[0].match(/d+/i);
+			console.log(args[0].match(/\d+/i))
+			const whereis_user_id = args[0].match(/\d+/i);
 			const whereis_user = await message.guild.members.fetch(whereis_user_id).catch(() => null);
 			const user_channel = whereis_user.voice.channel;
 			if(!user_channel) return message.reply('User is not in a voice channel');
