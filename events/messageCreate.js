@@ -63,6 +63,14 @@ module.exports = {
 			redis.set('state:alliance_locked', 0);
 			message.reply('✅ Alliances notifications enabled');
 			break;
+		
+			case 'whereis':
+				if((!(isOwner || isManager || isSupervisor || isStaff))) return;
+				const whereis_user_id = args[0].match(/d+/)[0];
+				const whereis_user = await message.guild.members.fetch(whereis_user_id).catch(() => null);
+				const user_channel = whereis_user.voice.channel;
+				if(!user_channel) return message.reply('User is not in a voice channel');
+				message.reply(`User is in ${user_channel}`);
 		}
 	},
 };
