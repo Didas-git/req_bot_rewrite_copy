@@ -66,8 +66,9 @@ module.exports = {
 		
 		case 'whereis':
 			if((!(isOwner || isManager || isSupervisor || isStaff))) return;
-			print(args)
-			print(args[0])
+			console.log(args)
+			console.log(args[0])
+			console.log(args[0].match(/d+/))
 			const whereis_user_id = args[0].match(/d+/);
 			const whereis_user = await message.guild.members.fetch(whereis_user_id).catch(() => null);
 			const user_channel = whereis_user.voice.channel;
