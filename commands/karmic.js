@@ -43,25 +43,25 @@ module.exports = {
         .addIntegerOption(option => option.setName('sides').setDescription('Number of sides on the dice').setRequired(true))
         .addIntegerOption(option => option.setName('multiplier').setDescription('Number of extra marbles to add to the bag')),
     
-        permission(interaction, client) {
-            try {
-                console.log('Interaction:', interaction);
-                console.log('Interaction Member:', interaction.member);
-                console.log('Interaction User:', interaction.user);
-            
-                const isOwner = client.config.OWNERS.includes(interaction.user.id);
-                const isManager = interaction.member.roles.cache.some(role => client.config.MANAGER_ROLE_NAMES.includes(role.name));
-                const isSupervisor = interaction.member.roles.cache.some(role => client.config.SUPERVISOR_ROLE_NAMES.includes(role.name));
-                const isStaff = interaction.member.roles.cache.some(role => client.config.STAFF_ROLE_NAMES.includes(role.name));
-            
-                return isOwner || isManager || isSupervisor || isStaff;
-            }
+    permission(interaction, client) {
+        try {
+            console.log('Interaction:', interaction);
+            console.log('Interaction Member:', interaction.member);
+            console.log('Interaction User:', interaction.user);
+        
+            const isOwner = client.config.OWNERS.includes(interaction.user.id);
+            const isManager = interaction.member.roles.cache.some(role => client.config.MANAGER_ROLE_NAMES.includes(role.name));
+            const isSupervisor = interaction.member.roles.cache.some(role => client.config.SUPERVISOR_ROLE_NAMES.includes(role.name));
+            const isStaff = interaction.member.roles.cache.some(role => client.config.STAFF_ROLE_NAMES.includes(role.name));
+        
+            return isOwner || isManager || isSupervisor || isStaff;
+        }
 
-            catch (e) {
-                console.error(e);
-                return false;
-            }
-        },        
+        catch (e) {
+            console.error(e);
+            return false;
+        }
+    },        
 
     async execute(interaction) {
         try {
