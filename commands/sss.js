@@ -79,7 +79,7 @@ module.exports = {
 		const server_number = category.name.match(/\d+/)[0];
 
 		const children = await getActiveShipChannels(category);
-		const sorted_children = children.sort((a, b) => a.position - b.position);
+		const sorted_children = children.sort((a, b) => a.position - b.position).slice(1); // remove fotd
 
 		if (!dices.has(server_number)) dices.set(server_number, new KarmicDice(sorted_children.size, 5));
 		const dice = dices.get(server_number);
