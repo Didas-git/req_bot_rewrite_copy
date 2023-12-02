@@ -38,7 +38,7 @@ class KarmicDice {
     }
 }
 
-let dice;
+const dices = new Map();
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('karmic')
@@ -64,13 +64,25 @@ module.exports = {
 	},
 
 	async execute(interaction) {
-		if (!dice) dice = new KarmicDice(4, 4);
+		const category = interaction.channel.parent.name;
+		const regex = /━━━\[ SoT Alliance \d+ \]━━━/i;
+		if (!regex.test(category)) return await interaction.reply('You must be in an alliance channel to use this command!');
+		const server_number = category.match(/\d+/)[0];
+
+		if (!dices.has(server_number)) dices.set(server_number, new KarmicDice(4, 5));
+		const dice = dices.get(server_number);
+
 		const faces = interaction.options.getInteger('faces');
 		const multiplier = interaction.options.getInteger('multiplier');
 
-		if (faces) dice.setFaces(faces);
+		dice.setFaces(faces);
 		if (multiplier) dice.setMultiplier(multiplier);
 
-		await interaction.reply(`You rolled a ${dice.roll() + 1}`);
+		const roll = dice.roll() + 1;
+		// get voice children in category, select nth child, n = roll, don't use .get as there is a different identifier
+		const children = interaction.channel.parent.children.filter(channel => channel.type === 'GUILD_VOICE');
+		const voice_channel = children.array()[roll];
+
+		await interaction.reply(`You rolled a ${dice.roll() + 1} - ${voice_channel}`);
 	},
 };
