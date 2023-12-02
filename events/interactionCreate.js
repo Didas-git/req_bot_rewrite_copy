@@ -11,9 +11,6 @@ const executeCommand = async (client, interaction) => {
 	try {
 		const args = interaction.options.data.length > 0 ? interaction.options.data.map(option => ` \`${option.name}${option.value ? `: ${option.value}` : ''}\``) : '';
 
-		const sub_options = interaction.options.data.map(option => option.options).flat();
-		const sub_args = sub_options.length > 0 ? sub_options.map(option => ` \`${option.name}${option.value ? `: ${option.value}` : ''}\``) : '';
-
 		if (command.permission ? !command.permission(interaction, client) : false) {
 			if (client.config.Settings.VERBOSE) { client.log('COMMANDS', `${interaction.user} was denied access to run the command \`/${interaction.commandName}\``); }
 			return interaction.reply('No Permission!');
@@ -27,7 +24,7 @@ const executeCommand = async (client, interaction) => {
 		if (cooldowns.has(command.data.name)) return interaction.reply('Woah, slow down there, you\'re going too fast!');
 
 		if (client.config.Settings.VERBOSE) {
-			await client.log('COMMANDS', `${interaction.user} ran the command \`/${interaction.commandName}\`${args}${sub_args}`);
+			await client.log('COMMANDS', `${interaction.user} ran the command \`/${interaction.commandName}\`${args}`);
 		}
 
 		if (command.cooldown) cooldowns.set(command.data.name, true);
