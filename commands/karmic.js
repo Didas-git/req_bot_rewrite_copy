@@ -80,7 +80,7 @@ module.exports = {
 
 		const roll = dice.roll() + 1;
 		// get voice children in category, select nth child, n = roll, don't use .get as there is a different identifier
-		const children = interaction.channel.parent.children.filter(channel => channel.type === 'GUILD_VOICE');
+		const children = interaction.channel.parent.children.cache.filter(channel => channel.type === 'GUILD_VOICE');
 		const voice_channel = children.array()[roll];
 
 		await interaction.reply(`You rolled a ${dice.roll() + 1} - ${voice_channel}`);
