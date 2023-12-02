@@ -8,6 +8,7 @@ class KarmicDice {
     }
 
     setFaces(faces) {
+		if (this.marbles.length === faces) return;
         const largest_marble = Math.max(...this.marbles);
         this.marbles = this.marbles.slice(0, faces).concat(Array(faces - this.marbles.length).fill(largest_marble));
     }
@@ -62,10 +63,10 @@ module.exports = {
 	async execute(interaction) {
 		if (!dice) dice = new KarmicDice(4, 5);
 		const faces = interaction.options.getInteger('faces');
-		const multiplier = interaction.options.getInteger('multiplier') || 2;
+		const multiplier = interaction.options.getInteger('multiplier');
 
-		dice.setFaces(faces);
-		dice.setMultiplier(multiplier);
+		if (faces) dice.setFaces(faces);
+		if (multiplier) dice.setMultiplier(multiplier);
 
 		await interaction.reply(`You rolled a ${dice.roll() + 1}`);
 	},
