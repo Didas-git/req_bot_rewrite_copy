@@ -67,6 +67,6 @@ module.exports = {
 		dice.setFaces(faces);
 		dice.setMultiplier(multiplier);
 
-		await interaction.reply(`You rolled a ${dice.roll() + 1}!`);
+		await interaction.reply(`You rolled a ${dice.roll() + 1}`);
 	},
 };
