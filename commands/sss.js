@@ -98,6 +98,6 @@ module.exports = {
 	
 		await interaction.reply(`**${voice_channel} won the Skull of Siren Song!**\nDo you wish to embark on the quest, or would you like to pass it on to another crew?`);
 		const mention = ' '.join(voice_channel.members.map(member => member.toString()));
-		if (mention !== '') await interaction.followUp(mention).then(msg => setTimeout(() => msg.delete(), 1000));
+		if (mention) await interaction.channel.followUp(mention).then(msg => setTimeout(() => msg.delete(), 1000));
 	}
 };
