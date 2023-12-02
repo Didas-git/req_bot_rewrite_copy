@@ -11,14 +11,15 @@ class KarmicDice {
 	setFaces(faces) {
 		if (this.marbles.length === faces) return;
 	
+		const largest_marble = Math.max(...this.marbles);
+		
 		if (faces < this.marbles.length) {
 			this.marbles = this.marbles.slice(0, faces);
 		} else {
-			const largest_marble = Math.max(...this.marbles);
-			const newLength = Math.max(0, Math.ceil(faces - this.marbles.length));
-			this.marbles = this.marbles.concat(Array(newLength).fill(largest_marble));
+			this.marbles = Array.from({ length: faces }, (_, index) => index < this.marbles.length ? this.marbles[index] : largest_marble);
 		}
-	}	
+	}
+	
 
     setMultiplier(multiplier) {
         this.extra_marbles = multiplier - 1;
