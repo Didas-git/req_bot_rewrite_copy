@@ -44,16 +44,19 @@ class KarmicDice {
     }
 }
 
+async function getServerShipChannels(category) {
+	return category.children.cache.filter(channel => channel.name.startsWith(`${category.server_number}-`) && !channel.name.toLowerCase().endsWith('situation room'));
+}
+
+async function getActiveShipChannels(category) {
+	return await getServerShipChannels(category).then(ship_channels => ship_channels.filter(channel => channel.name.match(/-(\w{1,3})]/i)?.length > 1));
+}
+
 const dices = new Map();
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName('karmic')
+		.setName('sss')
 		.setDescription('Rolls a karmic dice!')
-		.addIntegerOption(option => option
-			.setName('faces')
-			.setDescription('How many faces the dice has')
-			.setRequired(true),
-		)
 		.addIntegerOption(option => option
 			.setName('multiplier')
 			.setDescription('How many extra marbles to add')
@@ -78,8 +81,11 @@ module.exports = {
 		if (!dices.has(server_number)) dices.set(server_number, new KarmicDice(4, 5));
 		const dice = dices.get(server_number);
 
-		const faces = Number(interaction.options.getInteger('faces'));
 		const multiplier = interaction.options.getInteger('multiplier');
+		const active_ships = await getActiveShipChannels(interaction.channel.parent);
+		const faces = active_ships.size;
+
+		if (faces < 2) return await interaction.reply('There are not enough active ships to roll!');
 
 		dice.setFaces(faces);
 		if (multiplier) dice.setMultiplier(multiplier);
