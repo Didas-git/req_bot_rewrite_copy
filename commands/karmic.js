@@ -83,7 +83,7 @@ module.exports = {
 		const children = interaction.channel.parent.children.cache.filter(channel => channel.type == 2);
 		const sorted_children = children.sort((a, b) => a.position - b.position);
 		const voice_channel = sorted_children.get(Array.from(sorted_children.keys())[roll]);
-		console.log(voice_channel.map(channel => channel.name));
+		console.log(sorted_children.map(channel => channel.name));
 
 		console.log(`Server ${server_number} rolled a ${roll} - ${voice_channel}, ${faces} faces, ${multiplier || 4}x multiplier, ${dice.marbles}, ${dice.last_roll}, ${dice.previous_roll}`)
 
