@@ -84,18 +84,18 @@ module.exports = {
 		if (sorted_children.size === 0) return await interaction.reply('There are no eligible ships in this server!');
 		if (sorted_children.size == 1) return await interaction.reply('There is only one eligible ship in this server!');
 
-		if (!dices.has(server_number)) dices.set(server_number, new KarmicDice(sorted_children.size, 5));
+		if (!dices.has(server_number)) dices.set(server_number, new KarmicDice(sorted_children.size - 1, 5));
 		const dice = dices.get(server_number);
 
 		const multiplier = interaction.options.getInteger('multiplier');
 
-		dice.setFaces(sorted_children.size);
+		dice.setFaces(sorted_children.size - 1);
 		if (multiplier) dice.setMultiplier(multiplier);
 
 		const roll = dice.roll() + 1;
 		const voice_channel = sorted_children.get(sorted_children.map(channel => channel.id)[roll - 1]);
 
-		console.log(`Server ${server_number} rolled a ${roll} - ${voice_channel}, ${sorted_children.size} faces, ${multiplier || 4}x multiplier, ${dice.marbles}, ${dice.last_roll}, ${dice.previous_roll}`)
+		console.log(`Server ${server_number} rolled a ${roll} - ${voice_channel}, ${sorted_children.size - 1} faces, ${multiplier || 4}x multiplier, ${dice.marbles}, ${dice.last_roll}, ${dice.previous_roll}`)
 
 		await interaction.reply(`**${voice_channel} won the Skull of Siren Song!**\nDo you wish to embark on the quest, or would you like to pass it on to another crew?`);
 	},
