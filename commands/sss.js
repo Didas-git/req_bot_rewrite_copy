@@ -25,18 +25,13 @@ class KarmicDice {
     }
 
     roll() {
-		console.log(`Marbles: ${JSON.stringify(this.marbles)}`);
-
         this.marbles.forEach((_, i) => {
             if (i !== this.last_roll && this.last_roll > -1) this.marbles[i] += this.extra_marbles;
 			if (i === this.previous_roll) this.marbles[i] -= Math.floor(this.extra_marbles / 2);
 			if (this.marbles[i] < 1) this.marbles[i] = 1;
         });
 
-		console.log(`Marbles: ${JSON.stringify(this.marbles)}`);
-
         const bag = this.marbles.reduce((acc, cur, i) => acc.concat(Array(cur).fill(i)), []);
-		console.log(`Bag: ${JSON.stringify(bag)}`);
         const roll = bag[Math.floor(Math.random() * bag.length)];
 
         if (roll !== this.last_roll) {
@@ -102,5 +97,7 @@ module.exports = {
 		const voice_channel = sorted_children.get(sorted_children.map(channel => channel.id)[roll - 1]);
 	
 		await interaction.reply(`**${voice_channel} won the Skull of Siren Song!**\nDo you wish to embark on the quest, or would you like to pass it on to another crew?`);
+		const mention = ' '.join(voice_channel.members.map(member => member.toString()));
+		if (mention !== '') await interaction.followUp(mention).then(msg => setTimeout(() => msg.delete(), 1000));
 	}
 };
