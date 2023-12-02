@@ -107,26 +107,25 @@ module.exports = {
 		const children = interaction.channel.parent.children.cache.filter(channel => channel.type == 2);
 		const sorted_children = Array.from(children).sort((a, b) => a.position - b.position);
 		const voice_channel = sorted_children[roll - 1];
-		
-		if (!voice_channel) {
-			console.error(`Error: Voice channel is undefined.`);
+
+		if (!voice_channel || voice_channel.type !== 'GUILD_VOICE') {
+			console.error(`Error: Voice channel is not a valid voice channel.`);
 			console.log(`Sorted Children:`, sorted_children);
 			console.log(`Roll:`, roll);
-			return await interaction.reply('Failed to retrieve the winning voice channel.');
-		}		
+			console.log(`Voice Channel:`, voice_channel);
+			return await interaction.reply('Failed to retrieve a valid voice channel.');
+		}
 		
-		console.log(`Server ${server_number} rolled a ${roll} - ${voice_channel}, ${faces} faces, ${multiplier || 4}x multiplier, ${dice.marbles}, ${dice.last_roll}, ${dice.previous_roll}`);
+		console.log(`Server ${server_number} rolled a ${roll} - ${voice_channel.name} (${voice_channel.id}), ${faces} faces, ${multiplier || 4}x multiplier, ${dice.marbles}, ${dice.last_roll}, ${dice.previous_roll}`);
 		
-	
-		console.log(`Server ${server_number} rolled a ${roll} - ${voice_channel}, ${faces} faces, ${multiplier || 4}x multiplier, ${dice.marbles}, ${dice.last_roll}, ${dice.previous_roll}`);
-	
-		await interaction.reply(`**${voice_channel} won the Skull of Siren Song!**\nDo you wish to embark on the quest, or would you like to roll for another crew?`);
-	
+		await interaction.reply(`**${voice_channel.name} won the Skull of Siren Song!**\nDo you wish to embark on the quest, or would you like to roll for another crew?`);
+		
 		const members = voice_channel.members.map(member => member.user);
 		const mention = members.map(user => user.toString()).join(' ');
-	
+		
 		if (mention.length > 2000) return interaction.followUp('Too many members in the channel to mention!');
-	
+		
 		interaction.followUp(mention).then(ping => setTimeout(() => ping.delete(), 1000));
+		
 	}	
 };
