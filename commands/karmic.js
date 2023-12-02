@@ -79,7 +79,7 @@ module.exports = {
 		if (multiplier) dice.setMultiplier(multiplier);
 
 		const roll = dice.roll() + 1;
-		const children = interaction.channel.parent.children.cache.filter(channel => channel.type === 'GUILD_VOICE');
+		const children = interaction.channel.parent.children.cache;
 		console.log(children);
 
 		console.log(`Server ${server_number} rolled a ${roll} - ${children[roll]}, ${faces} faces, ${multiplier || 4}x multiplier, ${dice.marbles}, ${dice.last_roll}, ${dice.previous_roll}`)
