@@ -37,8 +37,18 @@ class KarmicDice {
 let dice;
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName('ping')
-		.setDescription('Replies with Pong!'),
+		.setName('karmic')
+		.setDescription('Rolls a karmic dice!')
+		.addIntegerOption(option => option
+			.setName('faces')
+			.setDescription('How many faces the dice has')
+			.setRequired(true),
+		)
+		.addIntegerOption(option => option
+			.setName('multiplier')
+			.setDescription('How many extra marbles to add')
+			.setRequired(false),
+		),
 
 	permission(interaction, client) {
 		const isOwner = client.config.OWNERS.includes(interaction.user.id);
