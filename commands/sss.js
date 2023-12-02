@@ -88,7 +88,7 @@ module.exports = {
 		if (multiplier) dice.setMultiplier(multiplier);
 
 		const roll = dice.roll() + 1;
-		const children = getActiveShipChannels(category);
+		const children = await getActiveShipChannels(category);
 		const sorted_children = children.sort((a, b) => a.position - b.position);
 		const voice_channel = sorted_children.get(Array.from(sorted_children.keys())[roll]);
 		console.log(sorted_children.map(channel => channel.name));
