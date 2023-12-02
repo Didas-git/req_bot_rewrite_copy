@@ -64,7 +64,7 @@ module.exports = {
 	},
 
 	async execute(interaction) {
-		if (!dice) dice = new KarmicDice(4, 5);
+		if (!dice) dice = new KarmicDice(4, 4);
 		const faces = interaction.options.getInteger('faces');
 		const multiplier = interaction.options.getInteger('multiplier');
 
