@@ -49,7 +49,6 @@ module.exports = {
         const isSupervisor = interaction.member.roles.cache.some(role => client.config.SUPERVISOR_ROLE_NAMES.includes(role.name));
         const isStaff = interaction.member.roles.cache.some(role => client.config.STAFF_ROLE_NAMES.includes(role.name));
 
-        if (interaction.options.getSubcommand() === 'set') return isOwner || isManager;
         return isOwner || isManager || isSupervisor || isStaff;
     },
 
