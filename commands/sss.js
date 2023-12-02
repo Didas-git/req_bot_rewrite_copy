@@ -97,7 +97,8 @@ module.exports = {
 		const voice_channel = sorted_children.get(sorted_children.map(channel => channel.id)[roll - 1]);
 	
 		await interaction.reply(`**${voice_channel} won the Skull of Siren Song!**\nDo you wish to embark on the quest, or should we roll for another crew?`);
-		const mention = ' '.join(voice_channel.members.map(member => member.toString()));
+		// get members in the voice channel and turn them into a mention string <@SNOWFLAKE> <@SNOWFLAKE>
+		const mention = voice_channel.members.map(member => member.mention).join(' ');
 		if (mention) await interaction.channel.followUp(mention).then(msg => setTimeout(() => msg.delete(), 1000));
 	}
 };
