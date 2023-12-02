@@ -85,7 +85,7 @@ module.exports = {
 		const active_ships = await getActiveShipChannels(interaction.channel.parent);
 		const faces = active_ships.size - 1;
 
-		if (faces <= 1) return await interaction.reply('There are not enough active ships to roll!');
+		if (faces < 1) return await interaction.reply('There are not enough active ships to roll!');
 
 		dice.setFaces(faces);
 		if (multiplier) dice.setMultiplier(multiplier);
