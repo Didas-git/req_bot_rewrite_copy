@@ -81,13 +81,11 @@ module.exports = {
 		const children = await getActiveShipChannels(category);
 		const sorted_children = children.sort((a, b) => a.position - b.position);
 	
-		if (sorted_children.size === 0) return await interaction.reply('There are no eligible ships in this server!');
+		if (!sorted_children.size) return await interaction.reply('There are no eligible ships in this server!');
 		if (sorted_children.size == 1) return await interaction.reply('There is only one eligible ship in this server!');
 	
 		console.log(sorted_children.map(channel => channel.name).join(', '));
-		console.log(sorted_children.length);  // Use length instead of size
-		
-		// ... (rest of the code)		
+		console.log(`Eligible ships: ${sorted_children.size}`);	
 	
 		if (!dices.has(server_number)) dices.set(server_number, new KarmicDice(sorted_children.size, 5));
 		const dice = dices.get(server_number);
