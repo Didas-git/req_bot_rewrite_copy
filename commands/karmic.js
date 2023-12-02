@@ -94,6 +94,8 @@ module.exports = {
 		await interaction.reply(`**${voice_channel} won the Skull of Siren Song!**\nDo you wish to embark on the quest, or would you like to roll for another crew?`);
 		const members = voice_channel.members.map(member => member.user);
 		const mention = members.map(user => user.toString()).join(' ');
+		if (mention.length === 0) return;
+		if (mention.length > 2000) return interaction.followUp('Too many members in the channel to mention!')
 		interaction.followUp(mention);
 	},
 };
