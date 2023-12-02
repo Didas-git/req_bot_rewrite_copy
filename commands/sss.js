@@ -86,31 +86,34 @@ module.exports = {
 		const regex = /━━━\[ SoT Alliance \d+ \]━━━/i;
 		if (!regex.test(category)) return await interaction.reply('You must be in an alliance channel to use this command!');
 		const server_number = category.match(/\d+/)[0];
-
+	
 		if (!dices.has(server_number)) dices.set(server_number, new KarmicDice(4, 5));
 		const dice = dices.get(server_number);
-
+	
 		const multiplier = interaction.options.getInteger('multiplier');
 		const active_ships = await getActiveShipChannels(interaction.channel.parent);
+	
+		if (!active_ships) return await interaction.reply('Failed to retrieve active ships.');
+	
 		const faces = Math.max(active_ships.size - 1, 1);
-		
-		if (faces < 1) return await interaction.reply('There are not enough active ships to roll!');		
-
+	
+		if (faces < 1) return await interaction.reply('There are not enough active ships to roll!');
+	
 		dice.setFaces(faces);
 		if (multiplier) dice.setMultiplier(multiplier);
-
+	
 		const roll = dice.roll() + 1;
+	
 		const children = interaction.channel.parent.children.cache.filter(channel => channel.type == 2);
 		const sorted_children = children.sort((a, b) => a.position - b.position);
+	
 		const voice_channel = sorted_children.get(Array.from(sorted_children.keys())[roll]);
-
-		console.log(`Server ${server_number} rolled a ${roll} - ${voice_channel}, ${faces} faces, ${multiplier || 4}x multiplier, ${dice.marbles}, ${dice.last_roll}, ${dice.previous_roll}`)
-
-		await interaction.reply(`**${voice_channel} won the Skull of Siren Song!**\nDo you wish to embark on the quest, or would you like to roll for another crew?`);
-		const members = voice_channel.members.map(member => member.user);
-		const mention = members.map(user => user.toString()).join(' ');
-		if (mention.length === 0) return;
-		if (mention.length > 2000) return interaction.followUp('Too many members in the channel to mention!')
-		interaction.followUp(mention).then(ping => setTimeout(() => ping.delete(), 1000));
-	},
+	
+		if (!voice_channel) {
+			console.error(`Error: Voice channel is undefined.`);
+			return await interaction.reply('Failed to retrieve the winning voice channel.');
+		}
+	
+		console.log(`Server ${server_number} rolled a ${roll} - ${voice_channel}, ${faces} faces, ${multiplier || 4
+	
 };
