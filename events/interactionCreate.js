@@ -37,6 +37,7 @@ const executeCommand = async (client, interaction) => {
 
 	catch (error) {
 		client.error('COMMANDS', error);
+		console.error(error);
 	}
 };
 
