@@ -92,7 +92,7 @@ module.exports = {
 		const roll = dice.roll() + 1;
 		const voice_channel = sorted_children.get(sorted_children.map(channel => channel.id)[roll - 1]);
 
-		console.log(`Server ${server_number} rolled a ${roll} - ${voice_channel}, ${faces} faces, ${multiplier || 4}x multiplier, ${dice.marbles}, ${dice.last_roll}, ${dice.previous_roll}`)
+		console.log(`Server ${server_number} rolled a ${roll} - ${voice_channel}, ${sorted_children.size} faces, ${multiplier || 4}x multiplier, ${dice.marbles}, ${dice.last_roll}, ${dice.previous_roll}`)
 
 		await interaction.reply(`**${voice_channel} won the Skull of Siren Song!**\nDo you wish to embark on the quest, or would you like to pass it on to another crew?`);
 	},
