@@ -79,12 +79,10 @@ module.exports = {
 		if (multiplier) dice.setMultiplier(multiplier);
 
 		const roll = dice.roll() + 1;
-		// get voice children in category, select nth child, n = roll, don't use .get as there is a different identifier
-		const children = interaction.channel.parent.children.cache.filter(channel => channel.type === 'GUILD_VOICE');
-		const voice_channel = children.array()[roll];
+		const children = Array.from(interaction.channel.parent.children.cache.filter(channel => channel.type === 'GUILD_VOICE'));
 
-		console.log(`Server ${server_number} rolled a ${roll} - ${voice_channel}, ${faces} faces, ${multiplier} multiplier, ${dice.marbles}, ${dice.last_roll}, ${dice.previous_roll}`)
+		console.log(`Server ${server_number} rolled a ${roll} - ${children[roll]}, ${faces} faces, ${multiplier} multiplier, ${dice.marbles}, ${dice.last_roll}, ${dice.previous_roll}`)
 
-		await interaction.reply(`You rolled a ${dice.roll() + 1} - ${voice_channel}`);
+		await interaction.reply(`You rolled a ${dice.roll() + 1} - ${children[roll]}`);
 	},
 };
