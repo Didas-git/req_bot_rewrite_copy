@@ -45,7 +45,7 @@ class KarmicDice {
 }
 
 async function getServerShipChannels(category) {
-	return category.children.cache.filter(channel => channel.name.startsWith(`${category.server_number}-`) && !channel.name.toLowerCase().endsWith('situation room'));
+	return category.children.cache.filter(channel => channel.name.startsWith(`${category.server_number}-`) && !channel.name.toLowerCase().endsWith('situation room') && !channel.name.toLowerCase().contains('fotd'));
 }
 
 async function getActiveShipChannels(category) {
@@ -79,7 +79,7 @@ module.exports = {
 		const server_number = category.name.match(/\d+/)[0];
 
 		const children = await getActiveShipChannels(category);
-		const sorted_children = children.sort((a, b) => a.position - b.position).slice(1); // remove fotd
+		const sorted_children = children.sort((a, b) => a.position - b.position);
 
 		if (!dices.has(server_number)) dices.set(server_number, new KarmicDice(sorted_children.size, 5));
 		const dice = dices.get(server_number);
