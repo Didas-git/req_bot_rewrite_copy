@@ -85,6 +85,6 @@ module.exports = {
 
 		console.log(`Server ${server_number} rolled a ${roll} - ${voice_channel}, ${faces} faces, ${multiplier || 4}x multiplier, ${dice.marbles}, ${dice.last_roll}, ${dice.previous_roll}`)
 
-		await interaction.reply(`You rolled a ${dice.roll() + 1} - ${voice_channel}`);
+		await interaction.reply(`You rolled a ${roll} - ${voice_channel}`);
 	},
 };
