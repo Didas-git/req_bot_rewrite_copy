@@ -120,12 +120,20 @@ module.exports = {
 		
 		await interaction.reply(`**${voice_channel.name} won the Skull of Siren Song!**\nDo you wish to embark on the quest, or would you like to roll for another crew?`);
 		
-		const members = voice_channel.members.map(member => member.user);
-		const mention = members.map(user => user.toString()).join(' ');
+		const members = voice_channel.members;
+
+		if (!members) {
+			console.error(`Error: Members property not available for the voice channel.`);
+			console.log(`Voice Channel:`, voice_channel);
+			return await interaction.reply('Failed to retrieve members for the voice channel.');
+		}
 		
+		const mention = members.map(member => member.user.toString()).join(' ');
+
 		if (mention.length > 2000) return interaction.followUp('Too many members in the channel to mention!');
-		
+
+		await interaction.reply(`**${voice_channel.name} won the Skull of Siren Song!**\nDo you wish to embark on the quest, or would you like to roll for another crew?`);
+
 		interaction.followUp(mention).then(ping => setTimeout(() => ping.delete(), 1000));
-		
 	}	
 };
