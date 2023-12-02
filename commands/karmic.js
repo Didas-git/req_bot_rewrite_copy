@@ -52,14 +52,22 @@ module.exports = {
         return isOwner || isManager || isSupervisor || isStaff;
     },
 
-	async execute(interaction) {
+    async execute(interaction) {
         if (!dice) dice = new KarmicDice(4, 5);
+    
+        // Log interaction options for debugging
+        console.log('Interaction Options:', interaction.options);
+    
         const sides = interaction.options.getInteger('sides') ?? null;
         const multiplier = interaction.options.getInteger('multiplier') ?? null;
-
+    
+        // Log sides and multiplier for debugging
+        console.log('Sides:', sides);
+        console.log('Multiplier:', multiplier);
+    
         if (sides) dice.setFaces(sides);
         if (multiplier) dice.setMultiplier(multiplier);
-
-		await interaction.reply(`You rolled a ${dice.roll()}!`);
-	},
+    
+        await interaction.reply(`You rolled a ${dice.roll()}!`);
+    },    
 };
