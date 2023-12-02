@@ -95,7 +95,7 @@ module.exports = {
 	
 		if (!active_ships) return await interaction.reply('Failed to retrieve active ships.');
 	
-		const faces = Math.max(active_ships.size - 1, 1);
+		const faces = active_ships.size - 1;
 	
 		if (faces < 1) return await interaction.reply('There are not enough active ships to roll!');
 	
