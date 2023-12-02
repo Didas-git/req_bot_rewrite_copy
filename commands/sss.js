@@ -45,7 +45,7 @@ class KarmicDice {
 }
 
 async function getServerShipChannels(category) {
-	return category.children.cache.filter(channel => channel.name.startsWith(`${category.server_number}-`) && !channel.name.toLowerCase().endsWith('situation room') && !channel.name.toLowerCase().contains('fotd'));
+	return category.children.cache.filter(channel => channel.name.startsWith(`${category.server_number}-`) && !channel.name.toLowerCase().endsWith('situation room') && !channel.name.toLowerCase().includes('fotd'));
 }
 
 async function getActiveShipChannels(category) {
