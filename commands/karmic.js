@@ -54,8 +54,8 @@ module.exports = {
 
 	async execute(interaction) {
         if (!dice) dice = new KarmicDice(4, 5);
-        const sides = interaction.options.getInteger('sides');
-        const multiplier = interaction.options.getInteger('multiplier');
+        const sides = interaction.options.getInteger('sides') ?? null;
+        const multiplier = interaction.options.getInteger('multiplier') ?? null;
 
         if (sides) dice.setFaces(sides);
         if (multiplier) dice.setMultiplier(multiplier);
