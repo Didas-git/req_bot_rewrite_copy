@@ -43,31 +43,49 @@ module.exports = {
         .addIntegerOption(option => option.setName('sides').setDescription('Number of sides on the dice').setRequired(true))
         .addIntegerOption(option => option.setName('multiplier').setDescription('Number of extra marbles to add to the bag')),
     
-    permission(interaction, client) {
-        const isOwner = client.config.OWNERS.includes(interaction.user.id);
-        const isManager = interaction.member.roles.cache.some(role => client.config.MANAGER_ROLE_NAMES.includes(role.name));
-        const isSupervisor = interaction.member.roles.cache.some(role => client.config.SUPERVISOR_ROLE_NAMES.includes(role.name));
-        const isStaff = interaction.member.roles.cache.some(role => client.config.STAFF_ROLE_NAMES.includes(role.name));
+        permission(interaction, client) {
+            try {
+                console.log('Interaction:', interaction);
+                console.log('Interaction Member:', interaction.member);
+                console.log('Interaction User:', interaction.user);
+            
+                const isOwner = client.config.OWNERS.includes(interaction.user.id);
+                const isManager = interaction.member.roles.cache.some(role => client.config.MANAGER_ROLE_NAMES.includes(role.name));
+                const isSupervisor = interaction.member.roles.cache.some(role => client.config.SUPERVISOR_ROLE_NAMES.includes(role.name));
+                const isStaff = interaction.member.roles.cache.some(role => client.config.STAFF_ROLE_NAMES.includes(role.name));
+            
+                return isOwner || isManager || isSupervisor || isStaff;
+            }
 
-        return isOwner || isManager || isSupervisor || isStaff;
-    },
+            catch (e) {
+                console.error(e);
+                return false;
+            }
+        },        
 
     async execute(interaction) {
-        if (!dice) dice = new KarmicDice(4, 5);
-    
-        // Log interaction options for debugging
-        console.log('Interaction Options:', interaction.options);
-    
-        const sides = interaction.options.getInteger('sides') ?? null;
-        const multiplier = interaction.options.getInteger('multiplier') ?? null;
-    
-        // Log sides and multiplier for debugging
-        console.log('Sides:', sides);
-        console.log('Multiplier:', multiplier);
-    
-        if (sides) dice.setFaces(sides);
-        if (multiplier) dice.setMultiplier(multiplier);
-    
-        await interaction.reply(`You rolled a ${dice.roll()}!`);
+        try {
+            if (!dice) dice = new KarmicDice(4, 5);
+        
+            // Log interaction options for debugging
+            console.log('Interaction Options:', interaction.options);
+        
+            const sides = interaction.options.getInteger('sides') ?? null;
+            const multiplier = interaction.options.getInteger('multiplier') ?? null;
+        
+            // Log sides and multiplier for debugging
+            console.log('Sides:', sides);
+            console.log('Multiplier:', multiplier);
+        
+            if (sides) dice.setFaces(sides);
+            if (multiplier) dice.setMultiplier(multiplier);
+        
+            await interaction.reply(`You rolled a ${dice.roll()}!`);
+        }
+
+        catch (e) {
+            console.error(e);
+            await interaction.reply('Something went wrong!');
+        }
     },    
 };
