@@ -81,6 +81,7 @@ module.exports = {
 		const children = await getActiveShipChannels(category);
 		const sorted_children = children.sort((a, b) => a.position - b.position);
 
+		if (sorted_children.size === 0) return await interaction.reply('There are no eligible ships in this server!');
 		if (sorted_children.size == 1) return await interaction.reply('There is only one eligible ship in this server!');
 
 		if (!dices.has(server_number)) dices.set(server_number, new KarmicDice(sorted_children.size, 5));
