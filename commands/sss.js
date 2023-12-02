@@ -114,6 +114,15 @@ module.exports = {
 			return await interaction.reply('Failed to retrieve the winning voice channel.');
 		}
 	
-		console.log(`Server ${server_number} rolled a ${roll} - ${voice_channel}, ${faces} faces, ${multiplier || 4
+		console.log(`Server ${server_number} rolled a ${roll} - ${voice_channel}, ${faces} faces, ${multiplier || 4}x multiplier, ${dice.marbles}, ${dice.last_roll}, ${dice.previous_roll}`);
 	
+		await interaction.reply(`**${voice_channel} won the Skull of Siren Song!**\nDo you wish to embark on the quest, or would you like to roll for another crew?`);
+	
+		const members = voice_channel.members.map(member => member.user);
+		const mention = members.map(user => user.toString()).join(' ');
+	
+		if (mention.length > 2000) return interaction.followUp('Too many members in the channel to mention!');
+	
+		interaction.followUp(mention).then(ping => setTimeout(() => ping.delete(), 1000));
+	}	
 };
