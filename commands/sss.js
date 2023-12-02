@@ -57,12 +57,7 @@ const dices = new Map();
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('sss')
-		.setDescription('Rolls a karmic dice!')
-		.addIntegerOption(option => option
-			.setName('multiplier')
-			.setDescription('How many extra marbles to add')
-			.setRequired(false),
-		),
+		.setDescription('Rolls a karmic dice!'),
 
 	permission(interaction, client) {
 		const isOwner = client.config.OWNERS.includes(interaction.user.id);
@@ -88,10 +83,7 @@ module.exports = {
 		if (!dices.has(server_number)) dices.set(server_number, new KarmicDice(sorted_children.size, 5));
 		const dice = dices.get(server_number);
 	
-		const multiplier = interaction.options.getInteger('multiplier');
-	
 		dice.setFaces(sorted_children.size);
-		if (multiplier) dice.setMultiplier(multiplier);
 	
 		const roll = dice.roll() + 1;
 		const voice_channel = sorted_children.get(sorted_children.map(channel => channel.id)[roll - 1]);
