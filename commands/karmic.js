@@ -40,7 +40,7 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('karmic')
 		.setDescription('Rolls a karmic dice!')
-        .addIntegerOption(option => option.setName('sides').setDescription('Number of sides on the dice'), { required: true })
+        .addIntegerOption(option => option.setName('sides').setDescription('Number of sides on the dice')).setRequired(true)
         .addIntegerOption(option => option.setName('multiplier').setDescription('Number of extra marbles to add to the bag')),
     
     permission(interaction, client) {
