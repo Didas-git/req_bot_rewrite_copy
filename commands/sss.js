@@ -105,18 +105,15 @@ module.exports = {
 		const roll = dice.roll() + 1;
 	
 		const children = interaction.channel.parent.children.cache.filter(channel => channel.type == 2);
-		const sorted_children = children.sort((a, b) => a.position - b.position);
-	
-		const voice_channel = sorted_children.get(Array.from(sorted_children.keys())[roll]);
-
+		const sorted_children = Array.from(children).sort((a, b) => a.position - b.position);
+		const voice_channel = sorted_children[roll - 1];
+		
 		if (!voice_channel) {
 			console.error(`Error: Voice channel is undefined.`);
 			console.log(`Sorted Children:`, sorted_children);
 			console.log(`Roll:`, roll);
-			console.log(`Keys:`, Array.from(sorted_children.keys()));
-			console.log(`Children Array:`, sorted_children.array());
 			return await interaction.reply('Failed to retrieve the winning voice channel.');
-		}
+		}		
 		
 		console.log(`Server ${server_number} rolled a ${roll} - ${voice_channel}, ${faces} faces, ${multiplier || 4}x multiplier, ${dice.marbles}, ${dice.last_roll}, ${dice.previous_roll}`);
 		
