@@ -44,6 +44,14 @@ class KarmicDice {
     }
 }
 
+async function getServerShipChannels(category) {
+	return category.children.cache.filter(channel => channel.name.startsWith(`${category.server_number}-`) && !channel.name.toLowerCase().endsWith('situation room'));
+}
+
+async function getActiveShipChannels(category) {
+	return await getServerShipChannels(category).then(ship_channels => ship_channels.filter(channel => channel.name.match(/-(\w{1,3})]/i)?.length > 1));
+}
+
 const dices = new Map();
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -65,10 +73,10 @@ module.exports = {
 	},
 
 	async execute(interaction) {
-		const category = interaction.channel.parent.name;
+		const category = interaction.channel.parent;
 		const regex = /━━━\[ SoT Alliance \d+ \]━━━/i;
-		if (!regex.test(category)) return await interaction.reply('You must be in an alliance channel to use this command!');
-		const server_number = category.match(/\d+/)[0];
+		if (!regex.test(category.name)) return await interaction.reply('You must be in an alliance channel to use this command!');
+		const server_number = category.name.match(/\d+/)[0];
 
 		if (!dices.has(server_number)) dices.set(server_number, new KarmicDice(4, 5));
 		const dice = dices.get(server_number);
@@ -80,7 +88,7 @@ module.exports = {
 		if (multiplier) dice.setMultiplier(multiplier);
 
 		const roll = dice.roll() + 1;
-		const children = interaction.channel.parent.children.cache.filter(channel => channel.type == 2);
+		const children = getActiveShipChannels(category);
 		const sorted_children = children.sort((a, b) => a.position - b.position);
 		const voice_channel = sorted_children.get(Array.from(sorted_children.keys())[roll]);
 		console.log(sorted_children.map(channel => channel.name));
@@ -88,6 +96,5 @@ module.exports = {
 		console.log(`Server ${server_number} rolled a ${roll} - ${voice_channel}, ${faces} faces, ${multiplier || 4}x multiplier, ${dice.marbles}, ${dice.last_roll}, ${dice.previous_roll}`)
 
 		await interaction.reply(`**${voice_channel} won the Skull of Siren Song!**\nDo you wish to embark on the quest, or would you like to pass it on to another crew?`);
-		interaction.followUp(roll);
 	},
 };
