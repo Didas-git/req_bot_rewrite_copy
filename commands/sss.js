@@ -24,27 +24,33 @@ class KarmicDice {
     setMultiplier(multiplier) {
         this.extra_marbles = multiplier - 1;
     }
-	
-	roll() {
-		this.marbles.forEach((_, i) => {
-			if (i !== this.last_roll && this.last_roll > -1) this.marbles[i] += this.extra_marbles;
-			if (i === this.previous_roll) this.marbles[i] -= Math.floor(this.extra_marbles / 2);
-		});
-	
-		// Create a flat array with marble indices based on their count
-		const bag = this.marbles.flatMap((count, i) => Array(count).fill(i));
-	
-		const roll = bag[Math.floor(Math.random() * bag.length)];
-	
-		if (roll !== this.last_roll) {
-			this.marbles = this.marbles.map(() => 1);
-			this.marbles[roll] = 1;
-		}
-	
-		this.previous_roll = this.last_roll;
-		this.last_roll = roll;
-		return roll;
-	}	
+
+roll() {
+    this.marbles.forEach((_, i) => {
+        if (i !== this.last_roll && this.last_roll > -1) this.marbles[i] += this.extra_marbles;
+        if (i === this.previous_roll) this.marbles[i] -= Math.floor(this.extra_marbles / 2);
+    });
+
+    // Create a flat array with marble indices based on their count
+    const bag = [];
+    this.marbles.forEach((count, i) => {
+        for (let j = 0; j < count; j++) {
+            bag.push(i);
+        }
+    });
+
+    const roll = bag[Math.floor(Math.random() * bag.length)];
+
+    if (roll !== this.last_roll) {
+        this.marbles = this.marbles.map(() => 1);
+        this.marbles[roll] = 1;
+    }
+
+    this.previous_roll = this.last_roll;
+    this.last_roll = roll;
+    return roll;
+}
+
 }
 
 async function getServerShipChannels(category) {
