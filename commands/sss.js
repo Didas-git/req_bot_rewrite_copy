@@ -29,7 +29,8 @@ class KarmicDice {
 
         this.marbles.forEach((_, i) => {
             if (i !== this.last_roll && this.last_roll > -1) this.marbles[i] += this.extra_marbles;
-			if (i === this.previous_roll) this.marbles[i] -= Math.max(1, Math.floor(this.extra_marbles / 2));
+			if (i === this.previous_roll) this.marbles[i] -= Math.floor(this.extra_marbles / 2);
+			if (this.marbles[i] < 1) this.marbles[i] = 1;
         });
 
 		console.log(`Marbles: ${JSON.stringify(this.marbles)}`);
