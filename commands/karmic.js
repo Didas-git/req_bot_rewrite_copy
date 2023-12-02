@@ -4,6 +4,7 @@ class KarmicDice {
     constructor(faces = 4, multiplier = 2) {
         this.marbles = Array(faces).fill(1);
         this.extra_marbles = multiplier - 1;
+		this.previous_roll = -1
         this.last_roll = -1;
     }
 
@@ -20,6 +21,7 @@ class KarmicDice {
     roll() {
         this.marbles.forEach((_, i) => {
             if (i !== this.last_roll && this.last_roll > -1) this.marbles[i] += this.extra_marbles;
+			if (i === this.previous_roll) this.marbles[i] -= floor(this.extra_marbles / 2);
         });
 
         const bag = this.marbles.reduce((acc, cur, i) => acc.concat(Array(cur).fill(i)), []);
@@ -30,6 +32,7 @@ class KarmicDice {
             this.marbles[roll] = 1;
         }
 
+		this.previous_roll = this.last_roll;
         this.last_roll = roll;
         return roll;
     }
