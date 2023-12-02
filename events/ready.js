@@ -103,5 +103,6 @@ async function register_commands(client) {
 
 	catch (error) {
 		client.error('COMMANDS', error);
+		console.error(error);
 	}
 }
