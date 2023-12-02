@@ -78,20 +78,19 @@ module.exports = {
 		if (!regex.test(category.name)) return await interaction.reply('You must be in an alliance channel to use this command!');
 		const server_number = category.name.match(/\d+/)[0];
 
-		if (!dices.has(server_number)) dices.set(server_number, new KarmicDice(4, 5));
+		const children = await getActiveShipChannels(category);
+		const sorted_children = children.sort((a, b) => a.position - b.position);
+
+		if (!dices.has(server_number)) dices.set(server_number, new KarmicDice(sorted_children.size, 5));
 		const dice = dices.get(server_number);
 
-		const faces = 4;
 		const multiplier = interaction.options.getInteger('multiplier');
 
-		dice.setFaces(faces);
+		dice.setFaces(sorted_children.size);
 		if (multiplier) dice.setMultiplier(multiplier);
 
 		const roll = dice.roll() + 1;
-		const children = await getActiveShipChannels(category);
-		const sorted_children = children.sort((a, b) => a.position - b.position);
-		const voice_channel = sorted_children.get(Array.from(sorted_children.keys())[roll]);
-		console.log(sorted_children.map(channel => channel.name));
+		const voice_channel = sorted_children.get(sorted_children.map(channel => channel.id)[roll - 1]);
 
 		console.log(`Server ${server_number} rolled a ${roll} - ${voice_channel}, ${faces} faces, ${multiplier || 4}x multiplier, ${dice.marbles}, ${dice.last_roll}, ${dice.previous_roll}`)
 
