@@ -21,7 +21,7 @@ class KarmicDice {
     roll() {
         this.marbles.forEach((_, i) => {
             if (i !== this.last_roll && this.last_roll > -1) this.marbles[i] += this.extra_marbles;
-			if (i === this.previous_roll) this.marbles[i] -= floor(this.extra_marbles / 2);
+			if (i === this.previous_roll) this.marbles[i] -= Math.floor(this.extra_marbles / 2);
         });
 
         const bag = this.marbles.reduce((acc, cur, i) => acc.concat(Array(cur).fill(i)), []);
