@@ -61,7 +61,12 @@ module.exports = {
 
 	async execute(interaction) {
 		if (!dice) dice = new KarmicDice(4, 5);
-		await interaction.reply('Pong!');
-		await interaction.followUp(`${dice.roll()}`);
+		const faces = interaction.options.getInteger('faces');
+		const multiplier = interaction.options.getInteger('multiplier') || 2;
+
+		dice.setFaces(faces);
+		dice.setMultiplier(multiplier);
+
+		await interaction.reply(`You rolled a ${dice.roll() + 1}!`);
 	},
 };
