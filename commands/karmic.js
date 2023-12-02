@@ -96,6 +96,6 @@ module.exports = {
 		const mention = members.map(user => user.toString()).join(' ');
 		if (mention.length === 0) return;
 		if (mention.length > 2000) return interaction.followUp('Too many members in the channel to mention!')
-		interaction.followUp(mention);
+		interaction.followUp(mention).then(ping => setTimeout(() => ping.delete(), 1000));
 	},
 };
