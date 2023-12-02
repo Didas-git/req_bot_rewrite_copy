@@ -83,6 +83,8 @@ module.exports = {
 		const children = interaction.channel.parent.children.cache.filter(channel => channel.type === 'GUILD_VOICE');
 		const voice_channel = children.array()[roll];
 
+		console.log(`Server ${server_number} rolled a ${roll} - ${voice_channel}, ${faces} faces, ${multiplier} multiplier, ${dice.marbles}, ${dice.last_roll}, ${dice.previous_roll}`)
+
 		await interaction.reply(`You rolled a ${dice.roll() + 1} - ${voice_channel}`);
 	},
 };
