@@ -74,6 +74,19 @@ module.exports = {
 			const user = whereis_user.user;
 			if(!user_channel) return message.reply('User is not in a voice channel');
 			message.reply(`${user} is in ${user_channel}`);
+			break;
+		
+			case 'vc-mention':
+			if((!(isOwner || isManager || isSupervisor || isStaff))) return;
+			const vc_mention_channel_id = args[0].match(/\d+/i)[0];
+			if (!vc_mention_channel_id) return message.reply('Invalid channel');
+			const vc_mention_channel = await message.guild.channels.fetch(vc_mention_channel_id).catch(() => null);
+			if (!vc_mention_channel) return message.reply('Invalid channel');
+			const vc_users = vc_mention_channel.members;
+			const vc_users_array = Array.from(vc_users);
+			const vc_users_list = vc_users_array.map(user => user[1].user.toString());
+			const vc_users_string = vc_users_list.join(' ');
+			message.reply(`${vc_users_string}`);
 		}
 	},
 };
