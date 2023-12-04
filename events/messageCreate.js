@@ -76,7 +76,13 @@ module.exports = {
 			message.reply(`${user} is in ${user_channel}`);
 			break;
 		
-			case 'vc-mention' || 'vcmention' || 'mention-vc' || 'mentionvc' || 'vcm' || 'mvc' || 'vc':
+			case 'vc-mention':
+			case 'vcmention':
+			case 'mention-vc':
+			case 'mentionvc':
+			case 'vcm':
+			case 'mvc':
+			case 'vc':
 			if((!(isOwner || isManager || isSupervisor || isStaff))) return;
 			let vc_mention_channel_id;
 			if (args.length < 1) vc_mention_channel_id = message.member.voice.channel?.id;
