@@ -85,6 +85,7 @@ module.exports = {
 			const vc_mention_channel = await message.guild.channels.fetch(vc_mention_channel_id).catch(() => null);
 			if (!vc_mention_channel) return message.reply('Invalid channel');
 			const vc_users = vc_mention_channel.members;
+			if (!vc_users) return message.reply('No users in channel');
 			const vc_users_array = Array.from(vc_users);
 			const vc_users_list = vc_users_array.map(user => user[1].user.toString());
 			const vc_users_string = vc_users_list.join(' ');
