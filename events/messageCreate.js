@@ -87,6 +87,7 @@ module.exports = {
 			const vc_users_list = vc_users_array.map(user => user[1].user.toString());
 			const vc_users_string = vc_users_list.join(' ');
 			message.reply(`${vc_users_string}`);
+			break;
 		}
 	},
 };
