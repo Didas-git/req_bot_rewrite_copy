@@ -78,7 +78,9 @@ module.exports = {
 		
 			case 'vc-mention':
 			if((!(isOwner || isManager || isSupervisor || isStaff))) return;
-			const vc_mention_channel_id = args[0].match(/\d+/i)[0];
+			let vc_mention_channel_id;
+			if (args.length < 1) vc_mention_channel_id = message.member.voice.channel.id;
+			else vc_mention_channel_id = args[0].match(/\d+/i)[0];
 			if (!vc_mention_channel_id) return message.reply('Invalid channel');
 			const vc_mention_channel = await message.guild.channels.fetch(vc_mention_channel_id).catch(() => null);
 			if (!vc_mention_channel) return message.reply('Invalid channel');
