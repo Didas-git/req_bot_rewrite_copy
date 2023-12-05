@@ -5,12 +5,7 @@ const client = redis.createClient({
 
 client.on('error', (err) => console.error(err));
 client.on('connect', () => console.log('Redis connected'));
-client.on('ready', async () => {
-	console.log('Redis ready');
-	client.get('state:alliance_locked', (err, reply) => console.log(reply));
-	const locked = await client.get('state:alliance_locked');
-	console.log(locked);
-});
+client.on('ready', async () => console.log(locked));
 client.on('end', () => console.log('Redis disconnected'));
 
 process.on('SIGINT', () => client.quit());
