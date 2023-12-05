@@ -61,7 +61,7 @@ module.exports = {
 		.setDescription('Rolls a karmic dice!'),
 
 	async permission(interaction, client) {
-		redis = client.redis;
+		redis = interaction.client.redis;
 		const exists = await redis.exists('state:alliance_locked').catch(e => console.error(e));
 		console.log(exists);
 		return;
