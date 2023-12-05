@@ -62,6 +62,7 @@ module.exports = {
 
 	async permission(interaction, client) {
 		redis = interaction.client.redis;
+		console.log(await redis.ping());
 		const exists = await redis.exists('state:alliance_locked');
 		console.log(exists);
 		return;
