@@ -61,6 +61,8 @@ module.exports = {
 
 	async permission(interaction, client) {
 		interaction.server_locked = await client.redis.get('state:alliance_locked'); // 0 = unlocked, 1 = locked
+		console.log(interaction.server_locked);
+		console.log(!interaction_server_locked);
 		if (!interaction.server_locked) return true;
 
 		const isOwner = client.config.OWNERS.includes(interaction.user.id);
@@ -72,6 +74,7 @@ module.exports = {
 	},
 
 	async execute(interaction) {
+		return;
 		const category = interaction.channel.parent;
 		const regex = /━━━\[ SoT Alliance \d+ \]━━━/i;
 		if (!regex.test(category.name)) return await interaction.reply('You must be in an alliance channel to use this command!');
