@@ -5,7 +5,10 @@ const client = redis.createClient({
 
 client.on('error', (err) => console.error(err));
 client.on('connect', () => console.log('Redis connected'));
-client.on('ready', () => console.log('Redis ready'));
+client.on('ready', () => {
+	console.log('Redis ready');
+	console.log(client);
+});
 client.on('end', () => console.log('Redis disconnected'));
 
 process.on('SIGINT', () => client.quit());
