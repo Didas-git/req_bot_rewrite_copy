@@ -10,6 +10,6 @@ client.on('end', () => console.log('Redis disconnected'));
 
 process.on('SIGINT', () => client.quit());
 
-client.connect();
+(async () => { await client.connect(); })();
 
 module.exports = client;
