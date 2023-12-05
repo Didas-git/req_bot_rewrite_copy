@@ -60,7 +60,7 @@ module.exports = {
 		.setDescription('Rolls a karmic dice!'),
 
 	async permission(interaction, client) {
-		interaction.server_locked = await client.redis.get('state:alliance_locked'); // 0 = unlocked, 1 = locked
+		interaction.server_locked = await client.redis.get('state:alliance_locked').then(returnedState => Number(returnedState)) ?? true;
 		console.log(interaction.server_locked);
 		console.log(!interaction_server_locked);
 		if (!interaction.server_locked) return true;
