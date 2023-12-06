@@ -69,8 +69,7 @@ module.exports = {
 		console.log(await redis.get('state:alliance_locked'));
 		const exists = await redis.exists('state:alliance_locked');
 		console.log(exists);
-		console.log(`\n\n${await redis.keys('*').then(keys => keys.map(key => `'${key}' - ${key == 'state:alliance_locked'}`).join('\n'))}`);
-		console.log(await redis.GET('state:alliance_locked'));
+		console.log(`\n\n${await redis.keys('*').then(keys => keys.map(key => `'${key}' - ${key == 'state:alliance_locked'}`).join('\n'))}`)
 		return;
 		interaction.server_locked = await redis.get('state:alliance_locked').then(returnedState => Number(returnedState)) ?? true;
 		console.log(interaction.server_locked);
