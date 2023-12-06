@@ -59,10 +59,7 @@ module.exports = {
 		.setName('sss')
 		.setDescription('Rolls a karmic dice!'),
 
-	async permission(interaction, client) {
-		interaction.server_locked = await client.redis.get('state:alliance_locked'); // 0 = unlocked, 1 = locked
-		if (!interaction.server_locked) return true;
-
+	permission(interaction, client) {
 		const isOwner = client.config.OWNERS.includes(interaction.user.id);
 		const isManager = interaction.member.roles.cache.some(role => client.config.MANAGER_ROLE_NAMES.includes(role.name));
 		const isSupervisor = interaction.member.roles.cache.some(role => client.config.SUPERVISOR_ROLE_NAMES.includes(role.name));
@@ -92,7 +89,6 @@ module.exports = {
 		const voice_channel = sorted_children.get(sorted_children.map(channel => channel.id)[roll - 1]);
 	
 		await interaction.reply(`**${voice_channel} won the Skull of Siren Song!**\nDo you wish to embark on the quest, or should we roll for another crew?`);
-		if (!interaction.server_locked) return;
 		const mention = voice_channel.members.map(member => `<@${member.id}>`).join(' ');
 		if (mention) await interaction.followUp(mention).then(msg => setTimeout(() => msg.delete(), 1000));
 	}
