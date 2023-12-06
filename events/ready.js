@@ -16,7 +16,7 @@ module.exports = {
 		// Attach restart service to client.restart
 		client.restart = require(client.root + '/modules/restart.js');
 
-		// client.redis = require('../modules/redis');
+		client.redis = require('../modules/redis');
 		client.mongo = require('../modules/mongo').init(client);
 
 		client.user.setPresence({
