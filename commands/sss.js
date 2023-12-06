@@ -61,9 +61,7 @@ module.exports = {
 		.setDescription('Rolls a karmic dice!'),
 
 	async permission(interaction, client) {
-		console.log(redis);
-		console.log(client.redis);
-		return;
+		if (!redis.connected) return interaction.reply('Unable to connect to the database!');
 		interaction.server_locked = await redis.get('state:alliance_locked').then(returnedState => Number(returnedState)) ?? true;
 		console.log(interaction.server_locked);
 		console.log(!interaction_server_locked);
