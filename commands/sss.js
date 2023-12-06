@@ -62,8 +62,11 @@ module.exports = {
 
 	async permission(interaction, client) {
 		redis = client.redis;
-		redis.get('state:alliance_locked').then(console.log);
-		redis.exists('state:alliance_locked').then(console.log);
+		console.log(redis);
+		const key = await redis.get('state:alliance_locked');
+		const exists = await redis.exists('state:alliance_locked');
+		console.log(key);
+		console.log(exists);
 		return;
 		interaction.server_locked = await redis.get('state:alliance_locked').then(returnedState => Number(returnedState)) ?? true;
 		console.log(interaction.server_locked);
