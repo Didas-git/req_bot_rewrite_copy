@@ -1,5 +1,4 @@
 const { SlashCommandBuilder } = require('discord.js');
-const redis = require('../modules/redis.js');
 
 class KarmicDice {
     constructor(faces = 4, multiplier = 2) {
@@ -61,8 +60,8 @@ module.exports = {
 		.setDescription('Rolls a karmic dice!'),
 
 	async permission(interaction, client) {
-		if (!redis.connected) return interaction.reply('Unable to connect to the database!');
-		interaction.server_locked = await redis.get('state:alliance_locked').then(returnedState => Number(returnedState)) ?? true;
+		if (!client.redis.connected) return interaction.reply('Unable to connect to the database!');
+		interaction.server_locked = await client.redis.get('state:alliance_locked').then(returnedState => Number(returnedState)) ?? true;
 		console.log(interaction.server_locked);
 		console.log(!interaction_server_locked);
 		if (!interaction.server_locked) return true;
