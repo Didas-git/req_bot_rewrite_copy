@@ -1,5 +1,5 @@
 const { Events, ChannelType, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const redis = require('../modules/redis.js');
+let redis;
 
 const accessTimers = new Map();
 const users_visited_help_desk = new Map();
@@ -9,6 +9,7 @@ module.exports = {
 	once: false,
 	async execute(oldState, newState, client) {
 		if (oldState.channelId == newState.channelId) return;
+		if (!redis) redis = client.redis;
 
 		const categories = getCategories(newState.guild);
 		const channel_ids = await Promise.all(categories.map(category => getServerShipChannels(category).then(server => server.map(channel => channel.id)))).then(ids => ids.flat());
