@@ -20,7 +20,7 @@ module.exports = {
 		let relates_to_a_ship = [oldState?.channelId ?? false, newState?.channelId ?? false].some(ship_channel_id => channel_ids.includes(ship_channel_id));
 		const [joined_help_desk, left_help_desk] = [newState.channelId == help_desk.id, oldState.channelId == help_desk.id];
 		const joined_queue = newState.channelId == waiting_room.id || newState.channelId == supporter_room.id;
-		const locked = await redis.get('state:alliance_locked').then(returnedState => Number(returnedState)) ?? true;
+		const locked = await redis.GET('state:alliance_locked').then(returnedState => Number(returnedState)) ?? true;
 
 		if(joined_queue && !locked) {
 			const unlocked_embed = new EmbedBuilder()
@@ -91,7 +91,7 @@ async function helpDeskNotification(state, client, oldState, isMoved = false) {
 	const christmas = new Date().toLocaleString('en-US', { timeZone: 'America/New_York', month: 'numeric' }) == '12' && new Date().toLocaleString('en-US', { timeZone: 'America/New_York', day: 'numeric' }) == '25';
 	const new_years_day = new Date().toLocaleString('en-US', { timeZone: 'America/New_York', month: 'numeric' }) == '1' && new Date().toLocaleString('en-US', { timeZone: 'America/New_York', day: 'numeric' }) == '1';
 
-	const locked = await redis.get('state:alliance_locked').then(returnedState => Number(returnedState)) ?? true;
+	const locked = await redis.GET('state:alliance_locked').then(returnedState => Number(returnedState)) ?? true;
 	if (locked && !april_fools && !christmas && !new_years_day) {
 		state.member.send('An officer knows you are waiting, and will be with you shortly, we appreciate your patience.').catch(() => null);
 	}
@@ -213,11 +213,11 @@ async function checkLeavingRequest(voiceState, client) {
 	const sot_logs = voiceState.guild.channels.cache.find(channel => channel.name == client.config.Mentions.channels.sot_logs);
 	const sot_leaving = voiceState.guild.channels.cache.find(channel => channel.name == client.config.Mentions.channels.sot_leaving);
 
-	const approval = await redis.exists(`approval:${member.id}`);
-	const warn_window = await redis.exists(`warn_window:${member.id}`);
-	const leaving_req = await redis.exists(`leaving_req:${member.id}`);
+	const approval = await redis.EXISTS(`approval:${member.id}`);
+	const warn_window = await redis.EXISTS(`warn_window:${member.id}`);
+	const leaving_req = await redis.EXISTS(`leaving_req:${member.id}`);
 
-	const prompt_message_id = await redis.hGet(`leaving_req:${member.id}`, 'prompt_message');
+	const prompt_message_id = await redis.HGET(`leaving_req:${member.id}`, 'prompt_message');
 	const prompt_message = prompt_message_id && await sot_leaving.messages.fetch(prompt_message_id).catch(() => null);
 
 	const officer_ack_button = new ActionRowBuilder()
@@ -253,7 +253,7 @@ async function no_leaving_request(voiceState, sot_logs) {
 
 async function approved_to_leave(voiceState, sot_logs) {
 	const { member, guild } = voiceState;
-	const { approved_by: approved_by_id, approved_at: approved_at_iso } = await redis.hGetAll(`approval:${member.id}`);
+	const { approved_by: approved_by_id, approved_at: approved_at_iso } = await redis.HGETALL(`approval:${member.id}`);
 	const [approved_by, approved_at] = [guild.members.fetch(approved_by_id).catch(() => null), new Date(approved_at_iso)];
 
 	const log_embed = new EmbedBuilder()
@@ -262,13 +262,13 @@ async function approved_to_leave(voiceState, sot_logs) {
 
 	sot_logs.send({ embeds: [log_embed] });
 
-	redis.del(`approval:${member.id}`);
+	redis.DEL(`approval:${member.id}`);
 	console.log(`${member.user.tag} left ${voiceState.channel.name} after approval.`);
 }
 
 async function left_to_soon(voiceState, sot_logs) {
 	const { member } = voiceState;
-	const created_iso = await redis.hGet(`leaving_req:${member.id}`, 'created');
+	const created_iso = await redis.HGET(`leaving_req:${member.id}`, 'created');
 
 	const seconds_since_request = Math.floor((new Date().getTime() - new Date(created_iso).getTime()) / 1000);
 
@@ -283,14 +283,14 @@ async function left_to_soon(voiceState, sot_logs) {
 	sot_logs.send({ embeds: [log_embed] });
 	ping_officer(sot_logs);
 
-	redis.del(`warn_window:${member.id}`);
-	redis.del(`leaving_req:${member.id}`);
+	redis.DEL(`warn_window:${member.id}`);
+	redis.DEL(`leaving_req:${member.id}`);
 	console.log(`${member.user.tag} left ${voiceState.channel.name} after ${mm}m ${ss}s.`);
 }
 
 async function left_without_approval(voiceState, sot_logs) {
 	const { member } = voiceState;
-	const { created: created_iso } = await redis.hGetAll(`leaving_req:${member.id}`);
+	const { created: created_iso } = await redis.HGETALL(`leaving_req:${member.id}`);
 
 	const seconds_since_request = Math.floor((new Date().getTime() - new Date(created_iso).getTime()) / 1000);
 
@@ -304,8 +304,8 @@ async function left_without_approval(voiceState, sot_logs) {
 
 	sot_logs.send({ embeds: [log_embed] });
 
-	redis.del(`warn_window:${member.id}`);
-	redis.del(`leaving_req:${member.id}`);
+	redis.DEL(`warn_window:${member.id}`);
+	redis.DEL(`leaving_req:${member.id}`);
 	console.log(`${member.user.tag} left ${voiceState.channel.name} ${mm}m ${ss}s after requesting.`);
 }
 

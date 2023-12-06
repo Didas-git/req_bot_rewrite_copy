@@ -54,13 +54,13 @@ module.exports = {
 
 		case 'set-locked-sotalliances':
 			if (!(isOwner || isManager || isSupervisor || isStaff)) return;
-			redis.set('state:alliance_locked', 1);
+			redis.SET('state:alliance_locked', 1);
 			message.reply('❎ Alliances notifications disabled');
 			break;
 
 		case 'set-unlocked-sotalliances':
 			if (!(isOwner || isManager || isSupervisor || isStaff)) return;
-			redis.set('state:alliance_locked', 0);
+			redis.SET('state:alliance_locked', 0);
 			message.reply('✅ Alliances notifications enabled');
 			break;
 		
@@ -147,7 +147,7 @@ async function leavingRequest(args, requester, leaving_channel, message, config)
 
 	if (is_on_duty) return dummyRequest(message, playerLeaving, leaving_channel, sot_leaving);
 
-	const already_leaving = await redis.exists(`leaving_req:${playerLeaving.id}`).catch(e => console.error(e));
+	const already_leaving = await redis.EXISTS(`leaving_req:${playerLeaving.id}`).catch(e => console.error(e));
 	if (already_leaving) return leaving_channel.send(`${requester}\n${(self_request) ? 'You' : 'That player'} already has an active leaving request.`).then(response => setTimeout(() => response.delete(), 5000)).then(() => message.delete());
 
 	const sot_logs = guild.channels.cache.find(channel => channel.name == config.Mentions.channels.sot_logs);
@@ -279,10 +279,10 @@ async function leavingRequest(args, requester, leaving_channel, message, config)
 	console.log(`[${officer_prompt.id}] ${playerLeaving.user.tag} is leaving - requested by ${requester.tag}`);
 	localLogMessages.set(officer_prompt.id, logs_message.id);
 
-	await redis.hSet(`leaving_req:${playerLeaving.id}`, redis_hash);
+	await redis.HSET(`leaving_req:${playerLeaving.id}`, redis_hash);
 
-	redis.expire(`leaving_req:${playerLeaving.id}`, 60 * 30);
-	redis.set(`warn_window:${playerLeaving.id}`, `${Date.now() + (1000 * 60 * 10)}`, { EX: 60 * 10 });
+	redis.EXPIRE(`leaving_req:${playerLeaving.id}`, 60 * 30);
+	redis.SET(`warn_window:${playerLeaving.id}`, `${Date.now() + (1000 * 60 * 10)}`, { EX: 60 * 10 });
 
 	updatePromptColours(officer_prompt, sot_leaving, sot_leaving.client);
 }
@@ -424,16 +424,16 @@ async function handleRequest(approved, interaction, sot_logs, help_desk) {
 
 	const request = await getLeavingEntryByMessageID(interaction.message.id);
 	if (!request || !('requester' in request)) return;
-	redis.del(`leaving_req:${request.requester}`);
-	redis.del(`warn_window:${request.requester}`);
+	redis.DEL(`leaving_req:${request.requester}`);
+	redis.DEL(`warn_window:${request.requester}`);
 
 	if (approved) {
-		redis.hSet(`approval:${request.requester}`, {
+		redis.HSET(`approval:${request.requester}`, {
 			approved_by: interaction.user.id,
 			approved_at: new Date().toISOString(),
 		});
 
-		redis.expire(`approval:${request.requester}`, 60 * 30);
+		redis.EXPIRE(`approval:${request.requester}`, 60 * 30);
 	}
 
 	localLogMessages.delete(interaction.message.id);
@@ -453,11 +453,11 @@ async function editLogMessage(messageId, message, log_channel) {
 }
 
 async function getAllLeavingRequests() {
-	const keys = await redis.keys('leaving_req:*');
+	const keys = await redis.KEYS('leaving_req:*');
 	const values = new Collection();
 	await Promise.all(
 		keys.map(key => new Promise((resolve) => {
-			redis.hGetAll(key).then(value => {
+			redis.HGETALL(key).then(value => {
 				values.set(key, {
 					...value,
 					user: key.split(':')[1],
