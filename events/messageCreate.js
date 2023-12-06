@@ -52,17 +52,17 @@ module.exports = {
 			msota(args, channel, message);
 			break;
 
-		case 'set-locked-sotalliances':
-			if (!(isOwner || isManager || isSupervisor || isStaff)) return;
-			redis.set('state:alliance_locked', 1);
-			message.reply('❎ Alliances notifications disabled');
-			break;
+			case 'set-locked-sotalliances':
+				if (!(isOwner || isManager || isSupervisor || isStaff)) return;
+				redis.set('state:alliance_locked', 1);
+				message.reply('❎ Alliances notifications disabled');
+				break;
 
-		case 'set-unlocked-sotalliances':
-			if (!(isOwner || isManager || isSupervisor || isStaff)) return;
-			redis.set('state:alliance_locked', 0);
-			message.reply('✅ Alliances notifications enabled');
-			break;
+			case 'set-unlocked-sotalliances':
+				if (!(isOwner || isManager || isSupervisor || isStaff)) return;
+				redis.set('state:alliance_locked', 0);
+				message.reply('✅ Alliances notifications enabled');
+				break;
 		
 		case 'whereis':
 			if((!(isOwner || isManager || isSupervisor || isStaff))) return;
